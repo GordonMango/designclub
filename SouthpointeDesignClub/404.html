@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Not found - SPA Design Club</title>
+<style>
+:root{--bg:#111;--green:#24f29c;--grey:#aaadb0;--px:'Courier New',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:28px;
+  background:
+    linear-gradient(90deg, rgba(36,242,156,.12) 0 1px, transparent 1px 100%),
+    linear-gradient(0deg, rgba(36,215,242,.08) 0 1px, transparent 1px 100%),
+    var(--bg);
+  background-size:76px 100%, 100% 56px;
+  color:var(--green);
+  font-family:var(--px);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+main{max-width:720px;border:1px solid rgba(36,242,156,.42);padding:32px;background:rgba(4,10,11,.74)}
+h1{font-size:clamp(28px,8vw,58px);margin-bottom:18px}
+p{color:var(--grey);line-height:1.6;text-transform:none;letter-spacing:.05em}
+a{display:inline-block;margin-top:24px;color:var(--green);text-decoration:none;border:1px solid rgba(36,242,156,.6);padding:12px 16px}
+</style>
+</head>
+<body>
+<main>
+  <h1>404</h1>
+  <p>This route is not part of the SPA Design Club site.</p>
+  <a href="/">Return home</a>
+</main>
+</body>
+</html>

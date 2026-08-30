@@ -1,0 +1,1911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPA Design Club</title>
+<meta name="description" content="SPA Design Club at Southpointe Academy — Shaping Futures of STEAM. Formanus Futura, we shape the future.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=DotGothic16&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="vendor/scrollcraft/scrollcraft.css">
+<style>
+/* ============================================================
+   GORDON CLUB  —  edit the values in :root to re-skin the site
+   ============================================================ */
+:root{
+  --bg:#111111;
+  --bg-2:#0b0b0b;
+  --green:#24f29c;          /* primary neon */
+  --green-dim:rgba(36,242,156,.45);
+  --grid:rgba(111,207,151,.22);
+  --grey:#aaadb0;
+  --grey-dim:#5c6265;
+  --magenta:#f2249c;        /* secondary accent, used sparingly */
+  --px:'Press Start 2P', 'Courier New', monospace;
+  --term:'VT323', 'Courier New', monospace;
+  --jp:'DotGothic16', 'Press Start 2P', sans-serif;
+  --cell-x:22.016px;
+  --cell-y:16.512px;
+  --sc-canvas:#111111;
+  --sc-surface:#0b0f0f;
+  --sc-ink:#d8dde0;
+  --sc-ink-soft:#aaadb0;
+  --sc-accent:#24f29c;
+  --sc-accent-ink:#06100b;
+  --sc-font-display:var(--px);
+  --sc-font-text:var(--term);
+  --sc-font-mono:var(--term);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth; scroll-padding-top:72px}
+body{
+  background:var(--sc-canvas, var(--bg));
+  color:var(--green);
+  font-family:var(--px);
+  letter-spacing:1.6px;
+  text-transform:uppercase;
+  -webkit-font-smoothing:none;
+  overflow-x:hidden;
+}
+img,svg,video{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+
+/* ---------- shared background furniture ---------- */
+.scanlines{
+  position:fixed; inset:0; z-index:900; pointer-events:none; opacity:.35;
+  background:repeating-linear-gradient(
+    to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px,
+    rgba(0,0,0,.45) 3px, rgba(0,0,0,.45) 4px);
+  mix-blend-mode:multiply;
+}
+.flicker{
+  position:fixed; inset:0; z-index:901; pointer-events:none;
+  background:var(--green); opacity:0; mix-blend-mode:overlay;
+  animation:flick 7s steps(1) infinite;
+}
+@keyframes flick{
+  0%,96%,100%{opacity:0} 96.5%{opacity:.03} 97.5%{opacity:0} 98%{opacity:.02}
+}
+
+/* ============================================================
+   1. MAIN SITE
+   ============================================================ */
+#site{
+  --mx:0;
+  --my:0;
+  --scroll:0;
+  opacity:1;
+  position:relative;
+  isolation:isolate;
+}
+nav{
+  position:fixed; top:0; left:0; right:0; z-index:700;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 28px; font-size:10px; letter-spacing:.18em;
+  background:linear-gradient(var(--bg) 55%, rgba(17,17,17,0));
+}
+nav .brand{display:flex; align-items:center; gap:12px; color:var(--green)}
+nav .brand svg{width:22px;height:22px}
+nav ul{display:flex; gap:26px; list-style:none}
+nav a{color:var(--grey); transition:color .18s}
+nav a:hover{color:var(--green)}
+.menu-btn{display:none; background:none; border:1px solid var(--green-dim); color:var(--green);
+  font-family:var(--px); font-size:10px; padding:8px 10px; cursor:pointer}
+
+section{position:relative; padding:120px 28px; z-index:2}
+.wrap{max-width:1080px; margin:0 auto; position:relative; z-index:2}
+.scroll-progress[data-sc-progress]{
+  height:3px;
+  z-index:850;
+  background:linear-gradient(90deg, var(--green), #24d7f2, var(--magenta));
+  box-shadow:0 0 18px rgba(36,242,156,.45);
+}
+
+/* cybercity home */
+#hero{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  text-align:left;
+  padding:112px 28px 92px;
+  overflow:hidden;
+  isolation:isolate;
+  background:transparent;
+}
+#cityCanvas{
+  position:absolute;
+  inset:0;
+  z-index:3;
+  width:100%;
+  height:100%;
+  opacity:.66;
+  pointer-events:none;
+  mix-blend-mode:screen;
+}
+.scene-stage{
+  position:absolute;
+  inset:-7vh -7vw;
+  z-index:0;
+  pointer-events:none;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 72% 38%, rgba(36,215,242,.28), transparent 28%),
+    radial-gradient(circle at 18% 74%, rgba(242,36,156,.16), transparent 30%),
+    linear-gradient(110deg, rgba(3,7,9,.98), rgba(2,19,18,.88) 48%, rgba(3,7,11,.98)),
+    repeating-linear-gradient(90deg, rgba(36,242,156,.11) 0 1px, transparent 1px 96px),
+    repeating-linear-gradient(0deg, rgba(36,215,242,.08) 0 1px, transparent 1px 68px);
+  transform:
+    translate3d(calc(var(--mx) * -22px), calc((var(--my) * -14px) + (var(--scroll) * -64px)), 0)
+    scale(calc(1.03 + (var(--scroll) * .055)));
+  transform-origin:center;
+  transition:transform .2s ease-out;
+}
+.scene-stage::before,
+.scene-stage::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+}
+.scene-stage::before{
+  background:
+    linear-gradient(100deg, rgba(242,36,156,.14), transparent 32%, rgba(36,242,156,.11) 68%, transparent),
+    linear-gradient(90deg, rgba(36,242,156,.14) 0 1px, transparent 1px 100%),
+    linear-gradient(0deg, rgba(36,215,242,.10) 0 1px, transparent 1px 100%),
+    repeating-linear-gradient(0deg, transparent 0 13px, rgba(255,255,255,.035) 14px);
+  background-size:auto, 96px 100%, 100% 68px, 100% 14px;
+  mix-blend-mode:screen;
+  opacity:.56;
+}
+.scene-stage::after{
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.24), rgba(0,0,0,.03) 42%, rgba(0,0,0,.24)),
+    linear-gradient(180deg, rgba(0,0,0,.02) 0%, rgba(0,0,0,.05) 52%, rgba(17,17,17,.24) 100%),
+    radial-gradient(circle at calc(64% + (var(--mx) * 9%)) calc(44% + (var(--my) * 5%)), rgba(36,215,242,.18), transparent 34%),
+    radial-gradient(circle at 74% 42%, rgba(0,0,0,0) 0%, rgba(0,0,0,.24) 84%);
+  opacity:.42;
+}
+.scene-video{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:.01;
+  filter:saturate(1.34) contrast(1.1) brightness(.92);
+  transform:scale(1.045);
+  animation:cityDrift 18s ease-in-out infinite alternate;
+  pointer-events:none;
+  transition:opacity .35s ease;
+  will-change:opacity, transform;
+}
+.scene-video::-webkit-media-controls{
+  display:none !important;
+  -webkit-appearance:none;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+.scene-video::-webkit-media-controls-enclosure{
+  display:none !important;
+  -webkit-appearance:none;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+.scene-video::-webkit-media-controls-panel{
+  display:none !important;
+  -webkit-appearance:none;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+.scene-video::-webkit-media-controls-play-button{
+  display:none !important;
+  -webkit-appearance:none;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+.scene-video::-webkit-media-controls-start-playback-button{
+  display:none !important;
+  -webkit-appearance:none;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+*::-webkit-media-controls{
+  display:none !important;
+  -webkit-appearance:none;
+}
+*::-webkit-media-controls-enclosure{
+  display:none !important;
+  -webkit-appearance:none;
+}
+*::-webkit-media-controls-panel{
+  display:none !important;
+  -webkit-appearance:none;
+}
+*::-webkit-media-controls-play-button{
+  display:none !important;
+  -webkit-appearance:none;
+}
+*::-webkit-media-controls-start-playback-button{
+  display:none !important;
+  -webkit-appearance:none;
+}
+*::-webkit-media-controls-overlay-play-button{
+  display:none !important;
+  -webkit-appearance:none;
+}
+.scene-stage.video-ready .scene-video.home-video{
+  opacity:.96;
+}
+.scene-stage.video-failed .scene-video.home-video{
+  opacity:0;
+}
+@keyframes cityDrift{
+  0%{transform:scale(1.045) translate3d(-1.2%, -.8%, 0)}
+  100%{transform:scale(1.08) translate3d(1.3%, .7%, 0)}
+}
+.hero-hud{
+  position:relative;
+  z-index:5;
+  width:min(700px, 100%);
+  transform:translate3d(calc(var(--mx) * -8px), calc(var(--scroll) * -14px), 0);
+}
+.hero-kicker{
+  font-family:var(--term);
+  font-size:clamp(15px,2vw,20px);
+  color:#24d7f2;
+  letter-spacing:.08em;
+  margin-bottom:18px;
+  text-transform:uppercase;
+}
+.hero-jp{
+  font-family:var(--jp);
+  font-size:clamp(19px,4vw,36px);
+  letter-spacing:.22em;
+  text-indent:.22em;
+  margin-bottom:16px;
+  color:rgba(36,242,156,.78);
+}
+.hero-title{
+  font-size:clamp(28px,7.2vw,70px);
+  letter-spacing:.04em;
+  color:var(--green);
+  margin-bottom:22px;
+  position:relative;
+  display:inline-block;
+  line-height:1.18;
+  text-shadow:0 0 24px rgba(36,242,156,.36);
+}
+.hero-title::before,.hero-title::after{
+  content:attr(data-text);
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+.hero-title::before{color:var(--magenta); animation:gl1 4.2s steps(2) infinite; clip-path:inset(0 0 62% 0)}
+.hero-title::after{color:#24d7f2; animation:gl2 5.6s steps(2) infinite; clip-path:inset(58% 0 0 0)}
+@keyframes gl1{0%,92%,100%{transform:translate(0,0);opacity:0}93%{transform:translate(-3px,-1px);opacity:.85}96%{transform:translate(2px,1px);opacity:.6}98%{opacity:0}}
+@keyframes gl2{0%,90%,100%{transform:translate(0,0);opacity:0}91%{transform:translate(3px,1px);opacity:.8}95%{transform:translate(-2px,-1px);opacity:.5}97%{opacity:0}}
+.hero-sub{
+  font-family:var(--term);
+  font-size:clamp(18px,2.5vw,25px);
+  color:#d8dde0;
+  letter-spacing:.03em;
+  max-width:610px;
+  margin:0 0 24px;
+  line-height:1.45;
+  text-transform:none;
+  text-shadow:0 2px 16px rgba(0,0,0,.82);
+}
+.hero-hud .motto{
+  margin-top:0;
+  text-shadow:0 2px 14px rgba(0,0,0,.84);
+}
+.hero-actions{display:flex; gap:16px; justify-content:flex-start; flex-wrap:wrap}
+.btn{
+  font-family:var(--px); font-size:10px; letter-spacing:.08em; text-indent:.08em;
+  padding:15px 22px; border:1px solid var(--green); color:var(--green);
+  background:rgba(4,8,10,.42); cursor:pointer; transition:.18s;
+}
+.btn:hover{background:var(--green); color:var(--bg); box-shadow:0 0 22px var(--green-dim)}
+.btn.solid{background:var(--green); color:var(--bg)}
+.btn.solid:hover{background:rgba(4,8,10,.42); color:var(--green)}
+.city-readout{
+  position:absolute;
+  right:28px;
+  bottom:86px;
+  z-index:5;
+  display:grid;
+  grid-template-columns:repeat(3, minmax(92px, 1fr));
+  gap:1px;
+  max-width:430px;
+  border:1px solid rgba(36,242,156,.36);
+  background:rgba(36,242,156,.22);
+}
+.city-readout span{
+  display:block;
+  padding:14px 12px;
+  background:rgba(3,8,9,.72);
+  font-family:var(--term);
+  font-size:16px;
+  color:var(--grey);
+  letter-spacing:.04em;
+  text-transform:none;
+}
+.city-readout b{
+  display:block;
+  color:var(--green);
+  font-family:var(--px);
+  font-size:10px;
+  margin-bottom:7px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+/* section headers */
+.sec-num{font-size:10px; color:var(--grey-dim); letter-spacing:.3em; margin-bottom:14px}
+.sec-title{font-size:clamp(18px,3.6vw,30px); letter-spacing:.14em; text-indent:.14em; margin-bottom:10px}
+.sec-jp{font-family:var(--jp); font-size:14px; color:var(--green-dim); letter-spacing:.3em; margin-bottom:44px}
+.rule{height:1px; background:linear-gradient(90deg,var(--green),transparent); margin-bottom:44px}
+
+/* about */
+#about{
+  overflow:hidden;
+  background:transparent;
+}
+#about .wrap{z-index:3}
+.about-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:56px; align-items:start}
+.prose{font-family:var(--term); font-size:20px; line-height:1.6; color:var(--grey); letter-spacing:.08em; text-transform:none}
+.prose p+p{margin-top:20px}
+.prose b{color:var(--green); font-weight:400}
+.stats{display:grid; gap:2px; background:var(--green-dim); border:1px solid var(--green-dim)}
+.stat{background:var(--bg); padding:22px; position:relative; overflow:hidden}
+.stat::after{
+  content:'';
+  position:absolute;
+  inset:auto 0 0;
+  height:1px;
+  background:linear-gradient(90deg, transparent, rgba(36,242,156,.7), transparent);
+  transform:translateX(-105%);
+  opacity:.9;
+}
+.stat.sc-in::after,
+.stat.in::after{
+  animation:bootScan .82s ease-out both;
+}
+.stat .n{font-size:26px; color:var(--green); margin-bottom:10px; font-variant-numeric:tabular-nums}
+.stat .l{font-family:var(--term); font-size:17px; color:var(--grey); letter-spacing:.14em}
+
+/* divisions */
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:18px}
+.card{
+  border:1px solid rgba(111,207,151,.28); padding:26px; background:var(--bg-2);
+  transition:.22s; position:relative; overflow:hidden;
+}
+.card:hover{border-color:var(--green); transform:translateY(-4px); box-shadow:0 0 30px rgba(36,242,156,.12)}
+.card .ic{color:var(--green); margin-bottom:20px}
+.card h3{font-size:12px; letter-spacing:.16em; margin-bottom:12px}
+.card .jp{font-family:var(--jp); font-size:12px; color:var(--green-dim); letter-spacing:.24em; margin-bottom:14px}
+.card p{font-family:var(--term); font-size:18px; line-height:1.5; color:var(--grey); letter-spacing:.08em; text-transform:none}
+
+/* events */
+.ev{
+  display:grid; grid-template-columns:130px 1fr auto; gap:24px; align-items:center;
+  padding:22px 0; border-bottom:1px solid rgba(111,207,151,.18); transition:.2s;
+}
+.ev:hover{background:rgba(36,242,156,.04); padding-left:10px}
+.ev .date{font-size:11px; color:var(--green)}
+.ev .name{font-size:12px; color:var(--grey); letter-spacing:.14em}
+.ev .name span{display:block; font-family:var(--term); font-size:17px; color:var(--grey-dim); margin-top:8px; letter-spacing:.1em; text-transform:none}
+.ev .tag{font-family:var(--term); font-size:16px; color:var(--green); border:1px solid var(--green-dim); padding:5px 11px; letter-spacing:.14em}
+
+/* join */
+#join{text-align:center}
+.join-box{
+  border:1px solid var(--green-dim); padding:60px 28px; background:var(--bg-2);
+  box-shadow:inset 0 0 60px rgba(36,242,156,.05);
+}
+.join-box h2{font-size:clamp(16px,3.4vw,26px); letter-spacing:.16em; margin-bottom:18px}
+.join-box p{font-family:var(--term); font-size:20px; color:var(--grey); letter-spacing:.1em;
+  max-width:520px; margin:0 auto 34px; text-transform:none; line-height:1.55}
+
+/* footer */
+footer{
+  position:relative; z-index:2; border-top:1px solid rgba(111,207,151,.2);
+  padding:44px 28px; display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap;
+  font-size:10px; color:var(--grey-dim); letter-spacing:.18em;
+}
+footer a:hover{color:var(--green)}
+
+/* reveal on scroll */
+.rv{
+  opacity:0;
+  transform:translateY(28px) scale(.985);
+  filter:blur(3px) saturate(.72);
+  transition:opacity .68s ease, transform .68s cubic-bezier(.2,.9,.18,1), filter .68s ease;
+  will-change:opacity, transform, filter;
+}
+.rv.in,
+.rv.sc-in{
+  opacity:1;
+  transform:none;
+  filter:none;
+}
+.reason.rv.in,
+.reason.sc-in,
+.goal-tile.rv.in,
+.goal-tile.sc-in,
+.role.sc-in,
+.pillar.sc-in{
+  animation:signalSettle .62s ease-out both;
+}
+@keyframes signalSettle{
+  0%{clip-path:inset(0 0 100% 0)}
+  62%{clip-path:inset(0 0 0 0)}
+  74%{transform:translateX(2px)}
+  86%{transform:translateX(-1px)}
+  100%{clip-path:inset(0 0 0 0); transform:none}
+}
+@keyframes bootScan{
+  0%{transform:translateX(-105%)}
+  100%{transform:translateX(105%)}
+}
+
+
+/* quote block */
+.quote{border-left:2px solid var(--green); padding:26px 0 26px 28px; margin:46px 0 0}
+.quote .q{font-family:var(--term); font-size:22px; line-height:1.5; color:var(--grey);
+  letter-spacing:.06em; text-transform:none; font-style:italic; margin-bottom:18px}
+.quote .who{font-size:10px; color:var(--green); letter-spacing:.18em}
+
+/* numbered reason blocks */
+.reason{padding:30px 0; border-bottom:1px solid rgba(111,207,151,.18)}
+.reason .h{display:flex; align-items:baseline; gap:18px; margin-bottom:14px; flex-wrap:wrap}
+.reason .n{font-size:22px; color:var(--green-dim)}
+.reason h3{font-size:13px; letter-spacing:.16em; color:var(--green)}
+.reason p{font-family:var(--term); font-size:19px; line-height:1.55; color:var(--grey);
+  letter-spacing:.08em; text-transform:none; max-width:74ch}
+
+/* two-column definition rows */
+.defs{display:grid; grid-template-columns:1fr 1fr; gap:34px; margin-top:34px}
+.def h4{font-size:11px; letter-spacing:.16em; color:var(--green); margin-bottom:12px}
+.def p{font-family:var(--term); font-size:18px; line-height:1.5; color:var(--grey);
+  letter-spacing:.08em; text-transform:none}
+
+/* competition list */
+.comp{display:grid; grid-template-columns:1fr auto; gap:20px; align-items:center;
+  padding:20px 0; border-bottom:1px solid rgba(111,207,151,.18); transition:.2s}
+.comp:hover{background:rgba(36,242,156,.04); padding-left:10px}
+.comp .nm{font-size:12px; letter-spacing:.14em; color:var(--grey)}
+.comp .nm span{display:block; font-family:var(--term); font-size:17px; color:var(--grey-dim);
+  margin-top:8px; letter-spacing:.1em; text-transform:none}
+.comp .tag{font-family:var(--term); font-size:16px; color:var(--green);
+  border:1px solid var(--green-dim); padding:5px 11px; letter-spacing:.14em; white-space:nowrap}
+
+/* role cards */
+.roles{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px}
+.role{border:1px solid rgba(111,207,151,.28); background:var(--bg-2); padding:26px; transition:.22s}
+.role:hover{border-color:var(--green); transform:translateY(-3px)}
+.role .top{display:flex; justify-content:space-between; align-items:flex-start; gap:14px; margin-bottom:16px}
+.role h3{font-size:12px; letter-spacing:.14em; color:var(--green); line-height:1.5}
+.role .who{font-family:var(--term); font-size:15px; color:var(--grey-dim);
+  letter-spacing:.12em; border:1px solid rgba(111,207,151,.3); padding:4px 9px;
+  max-width:142px; text-align:right; line-height:1.2}
+.role p{font-family:var(--term); font-size:18px; line-height:1.5; color:var(--grey);
+  letter-spacing:.08em; text-transform:none}
+.role .exp{margin-top:14px; padding-top:14px; border-top:1px dashed rgba(111,207,151,.25);
+  font-family:var(--term); font-size:17px; line-height:1.45; color:var(--green);
+  letter-spacing:.08em; text-transform:none}
+
+/* pillars */
+.pillars{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:2px;
+  background:var(--green-dim); border:1px solid var(--green-dim)}
+.pillar{background:var(--bg); padding:30px}
+.pillar .n{font-size:24px; color:var(--green-dim); margin-bottom:16px; font-variant-numeric:tabular-nums}
+.pillar h3{font-size:12px; letter-spacing:.16em; margin-bottom:14px}
+.pillar p{font-family:var(--term); font-size:18px; line-height:1.5; color:var(--grey);
+  letter-spacing:.08em; text-transform:none}
+
+/* small print */
+.note{font-family:var(--term); font-size:17px; color:var(--grey-dim); letter-spacing:.08em;
+  text-transform:none; margin-top:26px; line-height:1.5; max-width:78ch}
+.motto{font-family:var(--term); font-size:19px; color:var(--green); letter-spacing:.16em;
+  text-transform:none; margin-top:12px}
+
+/* Scroll Craft scenes */
+#compete.scroll-pan-act{
+  padding:0;
+  overflow:visible;
+}
+.compete-stage{
+  position:sticky;
+  top:0;
+  display:grid;
+  align-items:center;
+  overflow:hidden;
+  padding:110px 28px 78px;
+  background:
+    radial-gradient(circle at calc(68% + (var(--sc-p, 0) * 12%)) 38%, rgba(36,215,242,.12), transparent 34%),
+    linear-gradient(180deg, rgba(2,6,8,.18), rgba(2,8,8,.86));
+}
+.compete-stage::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, rgba(36,242,156,.12) 0 1px, transparent 1px 100%),
+    linear-gradient(0deg, rgba(36,215,242,.08) 0 1px, transparent 1px 100%);
+  background-size:76px 100%, 100% 56px;
+  opacity:.22;
+  transform:translate3d(calc(var(--sc-p, 0) * -38px), 0, 0);
+}
+.goal-board-section{
+  padding:clamp(100px, 12vw, 152px) 28px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 84% 28%, rgba(36,215,242,.10), transparent 34%),
+    radial-gradient(circle at 18% 78%, rgba(242,36,156,.08), transparent 28%),
+    linear-gradient(180deg, rgba(3,7,8,.34), rgba(4,9,9,.82));
+}
+.goal-board-section::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, rgba(36,242,156,.12) 0 1px, transparent 1px 100%),
+    linear-gradient(0deg, rgba(36,215,242,.08) 0 1px, transparent 1px 100%);
+  background-size:76px 100%, 100% 56px;
+  opacity:.22;
+}
+.goal-board-section::after{
+  content:'';
+  position:absolute;
+  left:50%;
+  bottom:34px;
+  z-index:1;
+  width:min(520px, 48vw);
+  height:1px;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg, transparent, rgba(36,242,156,.58), rgba(36,215,242,.38), transparent);
+  box-shadow:0 0 18px rgba(36,242,156,.18);
+  pointer-events:none;
+}
+.goal-board-section .wrap{
+  z-index:2;
+}
+.goal-board{
+  display:grid;
+  grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr);
+  gap:clamp(36px, 6vw, 78px);
+  align-items:start;
+}
+.goal-copy{
+  max-width:720px;
+}
+.goal-copy .mission-title{
+  font-size:clamp(20px,4.8vw,46px);
+  line-height:1.25;
+  margin-bottom:30px;
+  text-shadow:0 0 26px rgba(36,242,156,.35);
+}
+.goal-copy .prose{
+  font-size:clamp(22px, 2.25vw, 29px);
+  line-height:1.44;
+  color:#d8dde0;
+  text-shadow:0 3px 24px rgba(0,0,0,.78);
+}
+.goal-copy .quote{
+  max-width:620px;
+  margin-top:36px;
+  padding:22px 0 22px 24px;
+  background:linear-gradient(90deg, rgba(4,10,11,.54), transparent);
+}
+.goal-tiles{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:14px;
+}
+.goal-tile{
+  position:relative;
+  min-height:220px;
+  overflow:hidden;
+  border:1px solid rgba(111,207,151,.32);
+  border-radius:6px;
+  background:
+    linear-gradient(180deg, rgba(6,13,14,.82), rgba(5,9,11,.68)),
+    rgba(11,15,15,.9);
+  padding:20px;
+  box-shadow:inset 0 1px 0 rgba(216,221,224,.07), 0 18px 46px rgba(0,0,0,.24);
+  transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.goal-tile::before{
+  content:'';
+  position:absolute;
+  inset:-1px;
+  background:radial-gradient(circle at 72% 18%, rgba(36,215,242,.12), transparent 42%);
+  opacity:.72;
+  pointer-events:none;
+}
+.goal-tile:hover{
+  transform:translateY(-4px);
+  border-color:rgba(36,242,156,.82);
+  box-shadow:inset 0 1px 0 rgba(216,221,224,.08), 0 22px 54px rgba(0,0,0,.28), 0 0 32px rgba(36,242,156,.12);
+}
+.goal-tile > *{
+  position:relative;
+  z-index:1;
+}
+.goal-tile h3{
+  font-size:11px;
+  line-height:1.5;
+  letter-spacing:.14em;
+  color:var(--green);
+  margin-bottom:10px;
+}
+.goal-tile p{
+  font-family:var(--term);
+  font-size:18px;
+  line-height:1.42;
+  color:var(--grey);
+  letter-spacing:.07em;
+  text-transform:none;
+}
+.tile-symbol{
+  position:relative;
+  height:96px;
+  margin-bottom:18px;
+  overflow:hidden;
+  border:1px solid rgba(36,242,156,.30);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 11px, rgba(255,255,255,.035) 12px),
+    linear-gradient(180deg, rgba(36,242,156,.07), rgba(36,215,242,.04));
+  box-shadow:inset 0 0 30px rgba(36,242,156,.04);
+}
+.tile-symbol::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg, rgba(36,242,156,.12) 0 1px, transparent 1px 100%),
+    linear-gradient(0deg, rgba(36,215,242,.08) 0 1px, transparent 1px 100%);
+  background-size:28px 100%, 100% 24px;
+  opacity:.45;
+  pointer-events:none;
+}
+.tile-symbol i{
+  font-style:normal;
+}
+.tile-symbol--access span{
+  position:absolute;
+  top:20px;
+  bottom:20px;
+  width:26%;
+  border:1px solid rgba(36,242,156,.58);
+  background:
+    linear-gradient(90deg, rgba(36,242,156,.14) 0 1px, transparent 1px 100%),
+    rgba(3,10,11,.62);
+  background-size:14px 100%;
+}
+.tile-symbol--access span:nth-child(1){left:18%}
+.tile-symbol--access span:nth-child(2){right:18%}
+.tile-symbol--access i{
+  position:absolute;
+  left:12%;
+  right:12%;
+  top:50%;
+  height:2px;
+  background:linear-gradient(90deg, rgba(242,36,156,.08), rgba(36,242,156,.88), rgba(36,215,242,.16));
+  box-shadow:0 0 18px rgba(36,242,156,.3);
+}
+.tile-symbol--support span{
+  position:absolute;
+  top:24px;
+  width:34%;
+  height:48px;
+  border:2px solid rgba(36,242,156,.66);
+  box-shadow:0 0 20px rgba(36,242,156,.16);
+}
+.tile-symbol--support span:nth-child(1){
+  left:10%;
+  border-right:0;
+  border-radius:22px 0 0 22px;
+}
+.tile-symbol--support span:nth-child(2){
+  right:10%;
+  border-left:0;
+  border-radius:0 22px 22px 0;
+}
+.tile-symbol--support i{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:42px;
+  height:42px;
+  transform:translate(-50%, -50%) rotate(45deg);
+  border:1px solid rgba(36,215,242,.78);
+  background:rgba(36,215,242,.14);
+  box-shadow:0 0 28px rgba(36,215,242,.18);
+}
+.tile-symbol--build span{
+  position:absolute;
+  left:14%;
+  top:20%;
+  width:38%;
+  height:56%;
+  border:1px solid rgba(36,215,242,.54);
+  background:linear-gradient(180deg, rgba(36,215,242,.10), rgba(2,9,10,.50));
+}
+.tile-symbol--build span::before,
+.tile-symbol--build span::after{
+  content:'';
+  position:absolute;
+  left:16%;
+  right:16%;
+  height:2px;
+  background:rgba(36,242,156,.68);
+  box-shadow:0 0 12px rgba(36,242,156,.32);
+}
+.tile-symbol--build span::before{top:30%}
+.tile-symbol--build span::after{top:62%}
+.tile-symbol--build i{
+  position:absolute;
+  right:14%;
+  bottom:18%;
+  width:38%;
+  height:48%;
+  border:1px solid rgba(36,242,156,.52);
+  background:
+    linear-gradient(45deg, transparent 48%, rgba(36,242,156,.55) 49% 51%, transparent 52%),
+    linear-gradient(135deg, transparent 48%, rgba(36,215,242,.45) 49% 51%, transparent 52%);
+  box-shadow:0 0 20px rgba(36,242,156,.12);
+}
+.tile-symbol--belong{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:6px;
+  padding:18px 24px 32px;
+}
+.tile-symbol--belong span{
+  min-height:17px;
+  border:1px solid rgba(36,242,156,.46);
+  background:rgba(36,242,156,.08);
+}
+.tile-symbol--belong i{
+  position:absolute;
+  left:50%;
+  bottom:10px;
+  transform:translateX(-50%);
+  padding:5px 10px;
+  border:1px solid rgba(36,242,156,.72);
+  background:rgba(2,10,10,.74);
+  color:var(--green);
+  font-family:var(--px);
+  font-size:9px;
+  letter-spacing:.12em;
+  box-shadow:0 0 20px rgba(36,242,156,.18);
+}
+.compete-stage{
+  grid-template-rows:1fr;
+  align-content:stretch;
+  justify-items:center;
+  padding:0;
+  perspective:1200px;
+}
+.compete-intro{
+  position:absolute;
+  top:clamp(76px, 9vh, 104px);
+  left:max(28px, calc((100vw - 1080px) / 2));
+  right:max(28px, calc((100vw - 1080px) / 2));
+  z-index:4;
+  width:auto;
+  margin:0 auto;
+  pointer-events:none;
+}
+.compete-intro .sec-title{
+  max-width:720px;
+  font-size:clamp(16px,3.2vw,34px);
+  line-height:1.25;
+  margin-bottom:8px;
+}
+.compete-rail{
+  position:relative;
+  z-index:4;
+  align-self:center;
+  display:flex;
+  align-items:center;
+  gap:18px;
+  width:max-content;
+  min-height:clamp(330px,48vh,460px);
+  padding:56px max(28px, calc(50vw - clamp(160px, 22vw, 310px))) 24px;
+}
+.comp-card{
+  --card-opacity:.58;
+  --card-lift:24px;
+  --card-scale:.93;
+  --card-tilt:0deg;
+  --card-sat:.78;
+  --card-bright:.76;
+  --card-border:.28;
+  --card-glow:0;
+  --card-sheen:0;
+  --card-light-x:50%;
+  position:relative;
+  overflow:hidden;
+  min-width:clamp(280px, 32vw, 440px);
+  max-width:440px;
+  min-height:300px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  gap:24px;
+  border:1px solid rgba(111,207,151,.34);
+  border-radius:6px;
+  background:linear-gradient(180deg, rgba(6,12,13,.82), rgba(5,8,10,.68));
+  box-shadow:
+    0 20px 58px rgba(0,0,0,.32),
+    0 0 46px rgba(36,242,156,var(--card-glow)),
+    inset 0 1px 0 rgba(216,221,224,.08);
+  padding:26px;
+  transform-origin:center;
+  opacity:var(--card-opacity);
+  filter:saturate(var(--card-sat)) brightness(var(--card-bright));
+  transform:translate3d(0, var(--card-lift), 0) scale(var(--card-scale)) rotateY(var(--card-tilt));
+  transition:border-color .14s linear, box-shadow .14s linear, opacity .14s linear, filter .14s linear;
+  will-change:transform, opacity, filter;
+  border-color:rgba(111,207,151,var(--card-border));
+}
+.comp-card::before{
+  content:'';
+  position:absolute;
+  inset:-1px;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at var(--card-light-x) 16%, rgba(36,242,156,var(--card-sheen)), transparent 36%),
+    linear-gradient(115deg, transparent 0%, rgba(36,215,242,var(--card-sheen)) 45%, transparent 68%);
+  mix-blend-mode:screen;
+  opacity:.9;
+}
+.comp-card.is-centered{
+  border-color:rgba(36,242,156,.88);
+}
+.comp-card > *{
+  position:relative;
+  z-index:1;
+}
+.comp-card--wide{
+  min-width:clamp(320px, 44vw, 620px);
+  max-width:620px;
+}
+.comp-card h3{
+  font-size:12px;
+  line-height:1.5;
+  letter-spacing:.14em;
+  color:var(--green);
+}
+.comp-card p{
+  font-family:var(--term);
+  font-size:18px;
+  line-height:1.48;
+  color:var(--grey);
+  letter-spacing:.07em;
+  text-transform:none;
+}
+.comp-card .tag{
+  align-self:flex-start;
+  font-family:var(--term);
+  font-size:16px;
+  color:var(--green);
+  border:1px solid var(--green-dim);
+  padding:5px 11px;
+  letter-spacing:.14em;
+}
+.comp-card .micro{
+  color:var(--grey-dim);
+}
+.rv.sc-in{opacity:1; transform:none; filter:none}
+[data-sc-spotlight]::after{mix-blend-mode:screen}
+
+@media (max-width:820px){
+  section{padding:88px 20px}
+  #hero{
+    min-height:100svh;
+    align-items:flex-end;
+    padding:96px 20px 112px;
+    text-align:left;
+  }
+  .scene-stage{
+    inset:-4vh -18vw;
+    transform:
+      translate3d(calc(var(--mx) * -10px), calc((var(--my) * -8px) + (var(--scroll) * -34px)), 0)
+      scale(calc(1.04 + (var(--scroll) * .04)));
+  }
+  .scene-video.home-video{
+    opacity:.9;
+  }
+  .hero-hud{
+    width:100%;
+    padding-top:28vh;
+  }
+  .hero-title{
+    font-size:clamp(26px,12vw,48px);
+    max-width:10ch;
+  }
+  .hero-sub{
+    max-width:100%;
+  }
+  .city-readout{
+    left:20px;
+    right:20px;
+    bottom:58px;
+    grid-template-columns:1fr 1fr 1fr;
+    max-width:none;
+  }
+  .city-readout span{
+    padding:10px 8px;
+    font-size:14px;
+  }
+  .city-readout b{
+    font-size:8px;
+  }
+  .goal-board-section{
+    padding:92px 20px 90px;
+  }
+  .goal-board{
+    grid-template-columns:1fr;
+    gap:34px;
+  }
+  .goal-copy .prose{
+    font-size:25px;
+  }
+  .goal-tiles{
+    grid-template-columns:1fr;
+  }
+  .goal-tile{
+    min-height:0;
+  }
+  .compete-stage{
+    padding:0;
+  }
+  .compete-intro{
+    top:82px;
+    left:20px;
+    right:20px;
+    width:auto;
+  }
+  .compete-rail{
+    gap:14px;
+    min-height:100svh;
+    padding-inline:max(20px, calc(50vw - 41vw));
+  }
+  .comp-card{
+    min-width:82vw;
+    min-height:320px;
+    padding:22px;
+  }
+  .about-grid{grid-template-columns:1fr; gap:36px}
+  nav ul{
+    display:none; position:absolute; top:100%; left:0; right:0; flex-direction:column;
+    gap:0; background:var(--bg); border-top:1px solid var(--green-dim);
+  }
+  nav ul.open{display:flex}
+  nav ul li{border-bottom:1px solid rgba(111,207,151,.15)}
+  nav ul a{display:block; padding:16px 24px}
+  .menu-btn{display:block}
+  .ev{grid-template-columns:1fr; gap:10px}
+  .ev .tag{justify-self:start}
+  .defs{grid-template-columns:1fr; gap:24px}
+  .comp{grid-template-columns:1fr; gap:12px}
+  .comp .tag{justify-self:start}
+  nav ul{gap:0}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important; transition-duration:.01ms !important}
+  .rv{opacity:1; transform:none; filter:none}
+  [data-sc-cue]{opacity:1 !important; transform:none !important}
+  .compete-rail{transform:none !important}
+  .goal-tile,.comp-card{opacity:1 !important; filter:none !important; transform:none !important}
+  .scene-stage,.hero-hud{transform:none !important}
+  .scene-video{filter:saturate(1.18) contrast(1.08) brightness(.72)}
+  #cityCanvas{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+<div class="flicker"></div>
+
+<!-- ============ SITE ============ -->
+<div id="site" data-sc-lerp=".16">
+
+<div class="scroll-progress" data-sc-progress aria-hidden="true"></div>
+
+<nav>
+  <a class="brand" href="#hero">
+    <svg viewBox="0 0 17 16" shape-rendering="crispEdges" id="crestSm"></svg>
+    <span>SPA Design Club</span>
+  </a>
+  <button class="menu-btn" id="menuBtn">Menu</button>
+  <ul id="navList">
+    <li><a href="#about">01 About</a></li>
+    <li><a href="#why">02 Why</a></li>
+    <li><a href="#compete">03 Compete</a></li>
+    <li><a href="#mentors">04 Mentors</a></li>
+    <li><a href="#roles">05 Roles</a></li>
+    <li><a href="#join">06 Join</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="scene-stage" aria-hidden="true">
+    <video class="scene-video home-video" muted loop playsinline webkit-playsinline preload="auto" tabindex="-1" disablepictureinpicture disableremoteplayback x-webkit-airplay="deny" controlslist="nodownload nofullscreen noplaybackrate noremoteplayback">
+      <source src="cybercity.mp4" type="video/mp4">
+    </video>
+    <canvas id="cityCanvas" aria-hidden="true"></canvas>
+  </div>
+  <div class="hero-hud">
+    <div class="hero-kicker">Southpointe Academy / STEAM Collective</div>
+    <div class="hero-jp">デザインクラブ</div>
+    <h1 class="hero-title" data-text="SPA Design Club">SPA Design Club</h1>
+    <p class="hero-sub">Shaping futures of STEAM. A year-round student collective at Southpointe Academy where students in grades 5&ndash;12 design, build, compete, and lead.</p>
+    <div class="motto">&ldquo;Formanus Futura&rdquo; &mdash; we shape the future</div>
+    <div class="hero-actions" style="margin-top:40px">
+      <a class="btn solid" href="#join">Join the club</a>
+      <a class="btn" href="#roles">Open roles</a>
+    </div>
+  </div>
+  <div class="city-readout" aria-hidden="true">
+    <span><b>Build</b>Prototype district</span>
+    <span><b>Mentor</b>Research uplink</span>
+    <span><b>Compete</b>Launch season</span>
+  </div>
+</section>
+
+<!-- 01 ABOUT -->
+<section id="about" data-sc-act="flow" data-sc-drift="#0b1110">
+  <div class="wrap">
+    <div class="rv">
+      <div class="sec-num">/ 01</div>
+      <h2 class="sec-title">About Design Club</h2>
+      <div class="sec-jp">デザインクラブについて</div>
+      <div class="rule"></div>
+    </div>
+    <div class="about-grid">
+      <div class="prose rv">
+        <p>Founded in <b>2026</b>, Design Club is a year-round club where students receive the opportunity to innovate almost anything.</p>
+        <p>The goal of this club is to equip students from <b>grades 5&ndash;12</b> with the skills and connections to succeed in the field of STEM &mdash; a field where there is a real need for adaptability and experience.</p>
+        <p>These initiatives drive our mission of <b>lifelong learning and global academic excellence</b>.</p>
+      </div>
+      <div class="stats rv">
+        <div class="stat"><div class="n" data-count-to="2026" data-count-from="2000">2026</div><div class="l">Founded</div></div>
+        <div class="stat"><div class="n" data-count-range="5 12">5&ndash;12</div><div class="l">Grades welcome</div></div>
+        <div class="stat"><div class="n" data-count-to="3" data-count-pad="2">03</div><div class="l">Program pillars</div></div>
+        <div class="stat"><div class="n" data-count-to="20" data-count-prefix="$" data-count-suffix="K">$20K</div><div class="l">ERA prize pool</div></div>
+      </div>
+    </div>
+
+    <div class="rv">
+      <div class="reason">
+        <div class="h"><span class="n">01</span><h3>Mentorship</h3></div>
+        <p>This program will provide students with opportunities to meet with PhD mentors through webinars and learn a multitude of skills necessary to succeed in a changing world.</p>
+        <div class="defs">
+          <div class="def"><h4>Research-driven curriculum</h4><p>Regularly updated with the latest advancements, such as building your own artificial intelligence.</p></div>
+          <div class="def"><h4>Technology integration</h4><p>Access to advanced tools and resources.</p></div>
+        </div>
+      </div>
+
+      <div class="reason">
+        <div class="h"><span class="n">02</span><h3>Competitions</h3></div>
+        <p>After mentorship, students will need to prove their skills. We will enter competitions throughout the year ranging from regional to national merit. As a result, we expect commitment from students joining the program &mdash; however, competitions are completely optional throughout this program.</p>
+        <div class="defs">
+          <div class="def"><h4>Fundraising &amp; financial aid</h4><p>As a club starting off, we will do our best to fundraise as much as possible in order to cut costs for our students.</p></div>
+          <div class="def"><h4>Open to everyone</h4><p>We accept anyone as long as you are able to participate in events.</p></div>
+        </div>
+      </div>
+
+      <div class="reason" style="border-bottom:0">
+        <div class="h"><span class="n">03</span><h3>Leadership &amp; community</h3></div>
+        <p>Because this club is a large project, it will require support from students of diverse backgrounds and disciplines. Hackathons will require students with a coding background; writing the brochure required writers. Everyone apart of this club will be supporting local initiatives, such as the recycling challenge that helps fundraise for future causes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OUR GOAL -->
+<section id="goal" class="goal-board-section" data-sc-act="flow" data-sc-drift="#06100e">
+  <div class="wrap">
+    <div class="goal-board">
+      <div class="goal-copy rv">
+        <div class="sec-num">/ Mission</div>
+        <h2 class="sec-title mission-title">Our goal</h2>
+        <div class="prose">
+          <p>STEM has historically not offered equal access, representation, or opportunity to everyone.</p>
+          <p>Design Club exists to make engineering feel reachable: learn, build, compete, and explore with real support.</p>
+          <p>Through workshops, projects, competitions, mentorship, and technical resources, students can discover new interests and feel that they belong in STEM.</p>
+        </div>
+        <div class="quote">
+          <div class="q">Engineering should be an opportunity open to everyone.</div>
+          <div class="who">&mdash; Gordon</div>
+        </div>
+      </div>
+
+      <div class="goal-tiles" aria-label="Mission focus areas">
+        <article class="goal-tile goal-tile--access rv">
+          <div class="tile-symbol tile-symbol--access" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <i></i>
+          </div>
+          <h3>Access</h3>
+          <p>Open the route into STEM for students who have not had the same starting line.</p>
+        </article>
+
+        <article class="goal-tile goal-tile--support rv">
+          <div class="tile-symbol tile-symbol--support" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <i></i>
+          </div>
+          <h3>Support</h3>
+          <p>Mentors, peers, and club systems keep projects from feeling like solo missions.</p>
+        </article>
+
+        <article class="goal-tile goal-tile--build rv">
+          <div class="tile-symbol tile-symbol--build" aria-hidden="true">
+            <span></span>
+            <i></i>
+          </div>
+          <h3>Build</h3>
+          <p>Workshops and resources turn an idea into something students can test and improve.</p>
+        </article>
+
+        <article class="goal-tile goal-tile--belong rv">
+          <div class="tile-symbol tile-symbol--belong" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <i>STEM</i>
+          </div>
+          <h3>Belong</h3>
+          <p>Students should be able to see themselves as builders, researchers, and leaders.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 WHY -->
+<section id="why" data-sc-act="flow" data-sc-drift="#0d100c">
+  <div class="wrap">
+    <div class="rv">
+      <div class="sec-num">/ 02</div>
+      <h2 class="sec-title">Why STEM competitions matter</h2>
+      <div class="sec-jp">なぜ競技会か</div>
+      <div class="rule"></div>
+    </div>
+    <div class="rv">
+      <div class="reason">
+        <div class="h"><span class="n">01</span><h3>STEM competitions are rare</h3></div>
+        <p>Most STEM competitions require lots of funding and a large student body &mdash; the Conrad Challenge, for example, requires more than 10 members. As a student collective, we have a huge advantage: funding from collaborative fundraising and the necessary resources in order to compete.</p>
+      </div>
+      <div class="reason">
+        <div class="h"><span class="n">02</span><h3>Innovation is defining the decade</h3></div>
+        <p>In a world revolving around artificial intelligence and automation, STEM is becoming an increasingly vital domain. Understanding the implications of STEM can open many doors to high-paying opportunities and job security in today&rsquo;s status quo.</p>
+      </div>
+      <div class="reason" style="border-bottom:0">
+        <div class="h"><span class="n">03</span><h3>The results speak for themselves</h3></div>
+        <p>Our experienced mentors have won numerous competitions. Their experience will be passed down to our students.</p>
+      </div>
+      <div class="quote">
+        <div class="q">Innovation thrives where curiosity meets opportunity. Our mission is to transform knowledge into solutions that benefit global communities.</div>
+        <div class="who">&mdash; Prof. Aaron Loeb, Ph.D.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 COMPETE -->
+<section id="compete" class="scroll-pan-act" data-sc-act="pan" data-sc-span="4.4" data-sc-drift="#0b0d12">
+  <div class="compete-stage" data-sc-stage data-sc-spotlight>
+    <div class="compete-intro" data-sc-cue="0 .22 0 .45">
+      <div class="sec-num">/ 03</div>
+      <h2 class="sec-title" data-sc-cue=".04 .24 0 .35" data-sc-kinetic="lines">Competitions &amp; conferences</h2>
+      <div class="sec-jp">大会とカンファレンス</div>
+    </div>
+    <div class="compete-rail" data-sc-pan="0">
+      <article class="comp-card comp-card--wide">
+        <div>
+          <h3>What and how</h3>
+          <p>Scroll through the path from first showcase to national challenge. Competitions are where ideas get tested, revised, and understood by people outside the room.</p>
+        </div>
+        <p class="micro">STEM competitions offer students the opportunity to showcase innovative products, receive feedback, and learn from industry-level professionals.</p>
+      </article>
+      <article class="comp-card">
+        <div>
+          <h3>Conrad Challenge</h3>
+          <p>August 27 &ndash; April 24. Trips and paid patents.</p>
+        </div>
+        <div class="tag">Flagship</div>
+      </article>
+      <article class="comp-card">
+        <div>
+          <h3>YSC Showcase</h3>
+          <p>Youth Science Canada showcase. $5,000 prize pool.</p>
+        </div>
+        <div class="tag">Starter</div>
+      </article>
+      <article class="comp-card">
+        <div>
+          <h3>Skills Canada BC Regionals</h3>
+          <p>Cabinet making and automotives. February 26. Winners access Nationals.</p>
+        </div>
+        <div class="tag">Regional</div>
+      </article>
+      <article class="comp-card">
+        <div>
+          <h3>Science Fair</h3>
+          <p>Regional science fair entry, open to all members.</p>
+        </div>
+        <div class="tag">Open</div>
+      </article>
+      <article class="comp-card">
+        <div>
+          <h3>Ingenious+</h3>
+          <p>National youth innovation challenge.</p>
+        </div>
+        <div class="tag">National</div>
+      </article>
+      <article class="comp-card comp-card--wide">
+        <div>
+          <h3>Fundraising and community service</h3>
+          <p>We have decided to join the Electronic Recycling Association&rsquo;s competition, with a prize pool of $20,000, to support future STEM competition costs.</p>
+        </div>
+        <p class="micro">Students can provide broken hardware to support the national recycling organization. Funding earned from ERA will become bursaries for parts, projects, and competition entries.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 04 MENTORS -->
+<section id="mentors" data-sc-act="flow" data-sc-drift="#0b1110">
+  <div class="wrap">
+    <div class="rv">
+      <div class="sec-num">/ 04</div>
+      <h2 class="sec-title">Principal investigators</h2>
+      <div class="sec-jp">主任研究員</div>
+      <div class="rule"></div>
+    </div>
+    <div class="rv">
+      <div class="reason">
+        <div class="h"><h3>What is novelty</h3></div>
+        <p>The best innovations are unique and original &mdash; which is what makes them novel.</p>
+      </div>
+      <div class="reason">
+        <div class="h"><h3>Why make novelty</h3></div>
+        <p>Novelty is what makes innovations useful. Imagine a million copies of a single innovation &mdash; it doesn&rsquo;t change anything. A part of this club is to make something useful, but more importantly to make a change in the world. Consequently, we have implemented a PI system where our mentors and experts will support students in ensuring that their projects encompass that unique spark.</p>
+      </div>
+      <div class="reason" style="border-bottom:0">
+        <div class="h"><h3>Who are the experts</h3></div>
+        <p>We will do our best to contact experts in many disciplines, such as artificial intelligence, to join our hosted webinars. It is up to students to attend meetings and ask questions that might benefit their project.</p>
+        <p style="margin-top:18px">At the same time, we acknowledge that this involves a relative amount of trust between students. That is why we will hold 1:1 meetings with students during appropriate times, and ensure that projects between students do not overlap as much as possible.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 ROLES -->
+<section id="roles" data-sc-act="flow" data-sc-drift="#11100b">
+  <div class="wrap">
+    <div class="rv">
+      <div class="sec-num">/ 05</div>
+      <h2 class="sec-title">Leadership &amp; opportunities</h2>
+      <div class="sec-jp">リーダーシップ</div>
+      <div class="rule"></div>
+    </div>
+    <p class="prose rv" style="max-width:78ch; margin-bottom:40px">Design Club is building a student-led team dedicated to creating accessible opportunities in engineering, research, innovation, and competition. <b>Applications for leadership, mentor, and investigator positions will be opening soon.</b></p>
+    <div class="roles rv">
+      <div class="role">
+        <div class="top"><h3>Vice President / Operations Lead</h3><div class="who">Seniors</div></div>
+        <p>Supports the President and manages the club&rsquo;s day-to-day operations, meetings, project timelines, member coordination, and internal organization.</p>
+        <div class="exp">&rsaquo; Expected to attend and help direct meetings unless stated otherwise.</div>
+      </div>
+      <div class="role">
+        <div class="top"><h3>Director of Competitions</h3><div class="who">Seniors</div></div>
+        <p>Researches competition opportunities, manages registration and deadlines, organizes competition teams, and helps members prepare for events such as Skills Canada, science fairs, and engineering challenges.</p>
+        <div class="exp">&rsaquo; Expected to find an opportunity every 2 months and provide a general overview for students.</div>
+      </div>
+      <div class="role">
+        <div class="top"><h3>Secretariat of Outreach</h3><div class="who">Seniors</div></div>
+        <p>Builds relationships with universities, engineering organizations, companies, researchers, and community partners. Responsible for contacting organizations, professors and PhD researchers to develop mentorships, workshops, guest-speaker opportunities, and partnerships.</p>
+        <div class="exp">&rsaquo; Expected to host a webinar at least once every 3 months. Suggested to collaborate with the Director of Competitions.</div>
+      </div>
+      <div class="role">
+        <div class="top"><h3>Director of Sponsorship &amp; Fundraising</h3><div class="who">Seniors</div></div>
+        <p>Leads sponsorship outreach and fundraising initiatives to support equipment, competition fees, engineering projects, and the club&rsquo;s future robotics program.</p>
+        <div class="exp">&rsaquo; Expected to host hardware collection initiatives for the Electronic Recycling Association and collaborate with the Secretariat of Outreach.</div>
+      </div>
+      <div class="role">
+        <div class="top"><h3>Social Media Managers</h3><div class="who">All ages openings</div></div>
+        <p>Manages the club&rsquo;s social media presence and creates regular posts highlighting projects, competitions, workshops, achievements, recruitment opportunities, and upcoming events. Multiple positions are open and highly recommended.</p>
+        <div class="exp">&rsaquo; Expected 1 post every 1.5 weeks. Needs to be professional and somewhat informative.</div>
+      </div>
+      <div class="role">
+        <div class="top"><h3>Engineering Mentors</h3><div class="who">All ages openings</div></div>
+        <p>Multiple mentor positions will be available for students with experience in specific technical areas.</p>
+      </div>
+      <div class="role">
+        <div class="top"><h3>CAD &amp; Mechanical Design Mentors</h3><div class="who">All ages openings</div></div>
+        <p>Teaches members CAD, 3D modelling, mechanical design, prototyping, and engineering design principles. Multiple openings are available for students who can support beginners.</p>
+      </div>
+      <div class="role">
+        <div class="top"><h3>Coding &amp; AI Mentors</h3><div class="who">All ages openings</div></div>
+        <p>Supports members working on websites, Python, JavaScript, Arduino logic, AI experiments, debugging, and interactive project demos.</p>
+      </div>
+      <div class="role">
+        <div class="top"><h3>Electronics &amp; Robotics Mentors</h3><div class="who">All ages openings</div></div>
+        <p>Helps teams with circuits, sensors, motors, microcontrollers, wiring, testing, and robotics troubleshooting during build sessions.</p>
+      </div>
+      <div class="role">
+        <div class="top"><h3>Research &amp; Pitch Writers</h3><div class="who">All ages openings</div></div>
+        <p>Writes project summaries, competition pitches, research notes, grant blurbs, and clear documentation that helps technical ideas make sense.</p>
+      </div>
+      <div class="role">
+        <div class="top"><h3>Prototype &amp; Fabrication Assistants</h3><div class="who">All ages openings</div></div>
+        <p>Supports hands-on building, material prep, simple fabrication, testing logs, iteration notes, and cleanup after prototype sessions.</p>
+      </div>
+      <div class="role">
+        <div class="top"><h3>Event &amp; Workshop Assistants</h3><div class="who">All ages openings</div></div>
+        <p>Helps set up workshops, welcome members, organize supplies, track attendance, photograph progress, and keep sessions running smoothly.</p>
+      </div>
+    </div>
+
+    <div class="prose rv" style="margin-top:50px; max-width:78ch">
+      <p><b>Some considerations.</b> If you do not find any role that interests you, feel free to talk to Gordon about new role openings that might suit your interest. As a design club, we appreciate any form of innovation &mdash; including your own ideal leadership roles.</p>
+      <p>Inconsistent participation in meetings, violation of rules, misconduct, and disrespecting members may result in leadership roles being removed.</p>
+      <p><b>No single type of experience defines a strong applicant.</b> We are looking for leaders who are curious and willing to learn.</p>
+    </div>
+    <div class="quote rv">
+      <div class="q">With great power comes great responsibility.</div>
+      <div class="who">&mdash; Spider-Man</div>
+    </div>
+  </div>
+</section>
+
+<!-- STRATEGIC PLAN -->
+<section id="plan" data-sc-act="flow" data-sc-drift="#0b0f12">
+  <div class="wrap">
+    <div class="rv">
+      <div class="sec-num">/ Strategic plan</div>
+      <h2 class="sec-title">Three pillars to success</h2>
+      <div class="sec-jp">三つの柱</div>
+      <div class="rule"></div>
+    </div>
+    <div class="pillars rv">
+      <div class="pillar">
+        <div class="n" data-count-to="1" data-count-pad="2">01</div>
+        <h3>Design and redefine</h3>
+        <p>Members begin by developing original ideas and transforming them into practical designs, prototypes, or engineering solutions. Through feedback from peers, mentors, and industry professionals, students strengthen their technical skills, improve their work, and learn how to approach challenges through an iterative design process.</p>
+      </div>
+      <div class="pillar">
+        <div class="n" data-count-to="2" data-count-pad="2">02</div>
+        <h3>Compete and achieve</h3>
+        <p>Members apply their knowledge and skills through engineering, science, and design competitions. Competition provides students with opportunities to work toward clear objectives, solve problems under real-world constraints, collaborate effectively, and demonstrate their abilities beyond the classroom.</p>
+      </div>
+      <div class="pillar">
+        <div class="n" data-count-to="3" data-count-pad="2">03</div>
+        <h3>Lead and contribute</h3>
+        <p>Members are encouraged to take leadership roles within the club and the broader STEM community. Through mentoring, project management, outreach, and team leadership, students develop the ability to support others, organize meaningful initiatives, and create opportunities for future members to succeed.</p>
+      </div>
+    </div>
+    <p class="note rv">Partnerships &mdash; As a club starting off, we understand that starting an organization alone is difficult. We do not have the funding necessary, the newest technology, or access to many competitions. Hence, we have decided to collaborate with organizations that support diverse student bodies and mentors with experienced backgrounds to teach us the skills necessary. Thank you to the organizations that have sponsored and supported us.</p>
+  </div>
+</section>
+
+<!-- 06 JOIN -->
+<section id="join" data-sc-act="flow" data-sc-drift="#101006">
+  <div class="wrap rv">
+    <div class="join-box">
+      <div class="sec-num">/ 06</div>
+      <h2>Getting started</h2>
+      <p>Anyone can join. We accept any student in grades 5&ndash;12 as long as you are able to participate in events &mdash; no prior STEM experience required. Talk to Gordon to get your name on the list.</p>
+      <div class="hero-actions">
+        <!-- Replace the href below with the club's real email or sign-up form -->
+        <a class="btn solid" href="#">Sign up</a>
+        <a class="btn" href="#roles">Apply for a role</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>&copy; 2026 SPA Design Club</div>
+  <div>Southpointe Academy</div>
+  <div>Formanus Futura &mdash; we shape the future</div>
+  <div>Shaping futures of STEAM</div>
+</footer>
+
+</div><!-- /#site -->
+
+<script src="vendor/scrollcraft/scrollcraft.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- pixel crest (edit the map to change the logo) ---------- */
+  var CREST = [
+    "....#########....",
+    "...##.......##...",
+    "..##.........##..",
+    ".##...........##.",
+    "##.............##",
+    "##..######.....##",
+    "##..##...##....##",
+    "##..##....##...##",
+    "##..##....##...##",
+    "##..##...##....##",
+    "##..######.....##",
+    ".##...........##.",
+    "..##.........##..",
+    "...##.......##...",
+    "....##.....##....",
+    ".....#######....."
+  ];
+  function paintCrest(svg){
+    if(!svg) return;
+    var s = '';
+    for (var y=0; y<CREST.length; y++){
+      var row = CREST[y], x = 0;
+      while (x < row.length){
+        if (row[x] === '#'){
+          var run = 0;
+          while (x+run < row.length && row[x+run] === '#') run++;
+          s += '<rect x="'+x+'" y="'+y+'" width="'+run+'" height="1" fill="currentColor"/>';
+          x += run;
+        } else x++;
+      }
+    }
+    svg.innerHTML = s;
+  }
+  paintCrest(document.getElementById('crestSm'));
+
+  /* ---------- cybercity home motion ---------- */
+  var hero = document.getElementById('hero');
+  var canvas = document.getElementById('cityCanvas');
+  var ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
+  var site = document.getElementById('site');
+  var sceneStage = document.querySelector('.scene-stage');
+  var cityVideo = document.querySelector('.scene-video.home-video');
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var pointer = { x:0, y:0, tx:0, ty:0 };
+  var mouse = { px:0, py:0 };
+  var smooth = { current:window.scrollY || 0, target:window.scrollY || 0, active:false };
+  var competitionSection = document.getElementById('compete');
+  var competitionCards = [];
+  var competitionEffectRAF = 0;
+  var nodes = [];
+  var w = 0, h = 0, dpr = 1;
+
+  function markVideoReady(video){
+    if (!video || video !== cityVideo || !sceneStage) return;
+    sceneStage.classList.add('video-ready');
+    sceneStage.classList.remove('video-failed');
+  }
+
+  function markVideoFallback(video){
+    if (!video || video !== cityVideo || !sceneStage || sceneStage.classList.contains('video-ready')) return;
+    sceneStage.classList.add('video-failed');
+  }
+
+  function tryPlay(video, shouldLoop){
+    if (!video) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+    video.autoplay = false;
+    video.controls = false;
+    video.disableRemotePlayback = true;
+    video.removeAttribute('controls');
+    video.removeAttribute('autoplay');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    video.setAttribute('muted', '');
+    if (typeof shouldLoop === 'boolean') video.loop = shouldLoop;
+    if (!video.paused) {
+      markVideoReady(video);
+      return;
+    }
+    var p = video.play();
+    if (p && p.then) {
+      p.then(function(){ markVideoReady(video); }).catch(function(){ markVideoFallback(video); });
+    }
+  }
+
+  function setVideoPlayback(){
+    tryPlay(cityVideo, true);
+  }
+
+  function initVideoGuard(){
+    if (!cityVideo) return;
+    cityVideo.controls = false;
+    cityVideo.autoplay = false;
+    cityVideo.muted = true;
+    cityVideo.defaultMuted = true;
+    cityVideo.removeAttribute('controls');
+    cityVideo.removeAttribute('autoplay');
+    cityVideo.addEventListener('playing', function(){ markVideoReady(cityVideo); });
+    cityVideo.addEventListener('loadeddata', function(){ tryPlay(cityVideo, true); });
+    cityVideo.addEventListener('canplay', function(){ tryPlay(cityVideo, true); });
+    cityVideo.addEventListener('error', function(){ markVideoFallback(cityVideo); });
+    window.addEventListener('pageshow', function(){ tryPlay(cityVideo, true); }, { passive:true });
+    window.addEventListener('focus', function(){ tryPlay(cityVideo, true); }, { passive:true });
+    document.addEventListener('visibilitychange', function(){
+      if (!document.hidden) tryPlay(cityVideo, true);
+    });
+    ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function(type){
+      window.addEventListener(type, function unlockVideo(){
+        tryPlay(cityVideo, true);
+        if (sceneStage && sceneStage.classList.contains('video-ready')) {
+          window.removeEventListener(type, unlockVideo);
+        }
+      }, { passive:true });
+    });
+    try { cityVideo.load(); } catch (e) {}
+    window.setTimeout(function(){ markVideoFallback(cityVideo); }, 3200);
+  }
+
+  function setHeroVar(name, value){
+    if (hero) hero.style.setProperty(name, value);
+    if (site) site.style.setProperty(name, value);
+  }
+
+  function updateScrollScenes(){
+    if (!hero) return;
+    var rect = hero.getBoundingClientRect();
+    var p = Math.min(1, Math.max(0, -rect.top / Math.max(1, rect.height)));
+    setHeroVar('--scroll', p.toFixed(3));
+    setVideoPlayback();
+    scheduleCompetitionCards();
+  }
+
+  function updateCompetitionCards(){
+    competitionEffectRAF = 0;
+    if (reduced || !competitionCards.length || !competitionSection) return;
+
+    var sectionRect = competitionSection.getBoundingClientRect();
+    if (sectionRect.bottom < -window.innerHeight * .2 || sectionRect.top > window.innerHeight * 1.2) return;
+
+    var center = window.innerWidth * .5;
+    var range = Math.max(window.innerWidth * .42, 320);
+    var bestCard = null;
+    var bestFocus = -1;
+
+    competitionCards.forEach(function(card){
+      var rect = card.getBoundingClientRect();
+      var cardCenter = rect.left + rect.width * .5;
+      var distance = Math.abs(cardCenter - center);
+      var focus = Math.max(0, 1 - (distance / Math.max(range, rect.width * .9)));
+      focus = focus * focus * (3 - 2 * focus);
+      var side = Math.max(-1, Math.min(1, (cardCenter - center) / Math.max(1, center)));
+      var lift = (1 - focus) * 26;
+      var scale = .925 + focus * .085;
+      var tilt = side * -7 * (1 - focus * .55);
+
+      card.style.setProperty('--card-opacity', (.56 + focus * .44).toFixed(3));
+      card.style.setProperty('--card-lift', lift.toFixed(1) + 'px');
+      card.style.setProperty('--card-scale', scale.toFixed(3));
+      card.style.setProperty('--card-tilt', tilt.toFixed(2) + 'deg');
+      card.style.setProperty('--card-sat', (.78 + focus * .48).toFixed(3));
+      card.style.setProperty('--card-bright', (.76 + focus * .30).toFixed(3));
+      card.style.setProperty('--card-border', (.28 + focus * .58).toFixed(3));
+      card.style.setProperty('--card-glow', (focus * .34).toFixed(3));
+      card.style.setProperty('--card-sheen', (focus * .24).toFixed(3));
+      card.style.setProperty('--card-light-x', (50 - side * 18).toFixed(1) + '%');
+
+      if (focus > bestFocus) {
+        bestFocus = focus;
+        bestCard = card;
+      }
+    });
+
+    competitionCards.forEach(function(card){
+      card.classList.toggle('is-centered', card === bestCard && bestFocus > .45);
+    });
+  }
+
+  function scheduleCompetitionCards(){
+    if (competitionEffectRAF) return;
+    competitionEffectRAF = requestAnimationFrame(function(){
+      requestAnimationFrame(updateCompetitionCards);
+    });
+  }
+
+  function initCompetitionCards(){
+    competitionCards = Array.prototype.slice.call(document.querySelectorAll('.comp-card'));
+    scheduleCompetitionCards();
+    window.addEventListener('resize', scheduleCompetitionCards, { passive:true });
+  }
+
+  function initScrollCraft(){
+    if (!site || !window.ScrollCraft) return;
+    document.querySelectorAll('.rv').forEach(function(node){
+      node.setAttribute('data-sc-in', '');
+    });
+    document.querySelectorAll('.about-grid, .stats, .roles, .pillars, .goal-tiles, .defs').forEach(function(node){
+      node.setAttribute('data-sc-in', '');
+      node.setAttribute('data-sc-stagger', '70');
+    });
+    document.querySelectorAll('.reason, .def').forEach(function(node){
+      node.setAttribute('data-sc-in', '');
+    });
+    document.querySelectorAll('.stat, .role, .pillar, .join-box').forEach(function(node){
+      if (!node.hasAttribute('data-sc-tilt')) node.setAttribute('data-sc-tilt', '3.5');
+    });
+    document.querySelectorAll('.btn').forEach(function(node){
+      node.setAttribute('data-sc-magnet', '.08');
+    });
+    window.ScrollCraft.mount(site, { lerp:.16 });
+    initCompetitionCards();
+  }
+
+  function movePointer(nx, ny, px, py){
+    pointer.tx = nx;
+    pointer.ty = ny;
+    mouse.px = px;
+    mouse.py = py;
+  }
+
+  function resetNode(node, scatter){
+    node.x = scatter ? Math.random() * w : (Math.random() > .5 ? -40 : w + 40);
+    node.y = Math.random() * h;
+    node.vx = (Math.random() > .5 ? 1 : -1) * (.08 + Math.random() * .24);
+    node.vy = -.06 + Math.random() * .12;
+    node.length = 10 + Math.random() * 42;
+    node.size = .8 + Math.random() * 1.8;
+    node.alpha = .08 + Math.random() * .22;
+    node.phase = Math.random() * Math.PI * 2;
+    node.color = Math.random() > .72 ? '242,36,156' : (Math.random() > .48 ? '36,215,242' : '36,242,156');
+  }
+
+  function resizeCanvas(){
+    if (!ctx) return;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
+    canvas.width = Math.max(1, Math.floor(w * dpr));
+    canvas.height = Math.max(1, Math.floor(h * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    nodes = [];
+    mouse.px = w * .5;
+    mouse.py = h * .5;
+    var count = Math.max(32, Math.min(76, Math.round(w / 20)));
+    for (var i=0; i<count; i++){
+      var node = {};
+      resetNode(node, true);
+      nodes.push(node);
+    }
+  }
+
+  function drawCityField(time){
+    if (!ctx || reduced) return;
+    ctx.clearRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'lighter';
+    pointer.x += (pointer.tx - pointer.x) * .08;
+    pointer.y += (pointer.ty - pointer.y) * .08;
+    setHeroVar('--mx', pointer.x.toFixed(3));
+    setHeroVar('--my', pointer.y.toFixed(3));
+
+    for (var i=0; i<nodes.length; i++){
+      var n = nodes[i];
+      n.x += n.vx;
+      n.y += n.vy + Math.sin(time * .0012 + n.phase) * .06;
+      if (n.x < -90 || n.x > w + 90 || n.y < -50 || n.y > h + 50) resetNode(n, false);
+
+      var x = n.x + pointer.x * 10;
+      var y = n.y + pointer.y * 8;
+      var a = n.alpha;
+
+      ctx.lineWidth = n.size;
+      ctx.strokeStyle = 'rgba(' + n.color + ',' + a + ')';
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + n.length * Math.sign(n.vx), y + n.vy * 48);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(' + n.color + ',' + Math.min(.82, a + .12) + ')';
+      ctx.fillRect(x, y, n.size, n.size);
+    }
+
+    requestAnimationFrame(drawCityField);
+  }
+
+  function clampScroll(y){
+    var max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    return Math.max(0, Math.min(max, y));
+  }
+
+  function stepSmoothScroll(){
+    smooth.current += (smooth.target - smooth.current) * .13;
+    if (Math.abs(smooth.target - smooth.current) < .6) {
+      smooth.current = smooth.target;
+      smooth.active = false;
+    }
+    window.scrollTo(0, smooth.current);
+    updateScrollScenes();
+    if (smooth.active) requestAnimationFrame(stepSmoothScroll);
+  }
+
+  function smoothTo(y){
+    if (reduced) {
+      window.scrollTo(0, y);
+      return;
+    }
+    smooth.target = clampScroll(y);
+    if (!smooth.active) {
+      smooth.current = window.scrollY || 0;
+      smooth.active = true;
+      requestAnimationFrame(stepSmoothScroll);
+    }
+  }
+
+  function initSmoothScroll(){
+    window.addEventListener('scroll', function(){
+      if (!smooth.active) {
+        smooth.current = window.scrollY || 0;
+        smooth.target = smooth.current;
+      }
+      updateScrollScenes();
+    }, { passive:true });
+
+    if (reduced) return;
+
+    document.addEventListener('click', function(e){
+      var link = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+      if (!link) return;
+      var href = link.getAttribute('href');
+      var target = href === '#' ? document.body : document.getElementById(href.slice(1));
+      if (!target) return;
+      e.preventDefault();
+      var top = target === document.body ? 0 : target.getBoundingClientRect().top + window.scrollY - 68;
+      smoothTo(top);
+      if (href !== '#') history.pushState(null, '', href);
+    });
+
+    var finePointer = !window.matchMedia || window.matchMedia('(pointer:fine)').matches;
+    if (!finePointer) return;
+
+    window.addEventListener('wheel', function(e){
+      if (e.ctrlKey || e.metaKey || e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      var nativeScroll = e.target.closest ? e.target.closest('textarea, select, [data-native-scroll]') : null;
+      if (nativeScroll) return;
+      e.preventDefault();
+      var factor = e.deltaMode === 1 ? 18 : (e.deltaMode === 2 ? window.innerHeight : 1);
+      smoothTo(smooth.target + e.deltaY * factor);
+    }, { passive:false });
+  }
+
+  initVideoGuard();
+
+  if (hero && !reduced){
+    hero.addEventListener('pointermove', function(e){
+      var rect = hero.getBoundingClientRect();
+      var px = e.clientX - rect.left;
+      var py = e.clientY - rect.top;
+      var nx = (px / Math.max(1, rect.width)) - .5;
+      var ny = (py / Math.max(1, rect.height)) - .5;
+      movePointer(nx, ny, px, py);
+    });
+    hero.addEventListener('pointerleave', function(){
+      movePointer(0, 0, w * .5, h * .5);
+    });
+    window.addEventListener('resize', resizeCanvas);
+    updateScrollScenes();
+    resizeCanvas();
+    requestAnimationFrame(drawCityField);
+  }
+  initSmoothScroll();
+  initScrollCraft();
+  updateScrollScenes();
+
+  function counterText(value, node){
+    var prefix = node.getAttribute('data-count-prefix') || '';
+    var suffix = node.getAttribute('data-count-suffix') || '';
+    var pad = parseInt(node.getAttribute('data-count-pad') || '0', 10);
+    var text = String(Math.round(value));
+    if (pad > 0) text = text.padStart(pad, '0');
+    return prefix + text + suffix;
+  }
+
+  function setCounterFinal(node){
+    var range = node.getAttribute('data-count-range');
+    if (range) {
+      var nums = range.trim().split(/\s+/);
+      node.textContent = nums[0] + '\u2013' + nums[1];
+      return;
+    }
+    node.textContent = counterText(parseFloat(node.getAttribute('data-count-to')) || 0, node);
+  }
+
+  function runCounter(node){
+    if (node.dataset.counted === 'true') return;
+    node.dataset.counted = 'true';
+    if (reduced) {
+      setCounterFinal(node);
+      return;
+    }
+
+    var range = node.getAttribute('data-count-range');
+    var from = parseFloat(node.getAttribute('data-count-from') || '0') || 0;
+    var to = parseFloat(node.getAttribute('data-count-to') || '0') || 0;
+    var startA = from;
+    var endA = to;
+    var startB = 0;
+    var endB = 0;
+
+    if (range) {
+      var nums = range.trim().split(/\s+/).map(function(n){ return parseFloat(n) || 0; });
+      startA = 1;
+      endA = nums[0] || 0;
+      startB = Math.max(1, Math.round((nums[1] || 0) * .45));
+      endB = nums[1] || 0;
+    }
+
+    var duration = parseInt(node.getAttribute('data-count-duration') || '980', 10);
+    var started = performance.now();
+
+    function frame(now){
+      var t = Math.min(1, (now - started) / Math.max(240, duration));
+      var eased = 1 - Math.pow(1 - t, 3);
+      if (range) {
+        var a = Math.round(startA + (endA - startA) * eased);
+        var b = Math.round(startB + (endB - startB) * eased);
+        node.textContent = a + '\u2013' + b;
+      } else {
+        node.textContent = counterText(startA + (endA - startA) * eased, node);
+      }
+      if (t < 1) requestAnimationFrame(frame);
+      else setCounterFinal(node);
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------- reveal on scroll ---------- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.rv').forEach(function(n){ io.observe(n); });
+
+  var countIO = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (en.isIntersecting){
+        runCounter(en.target);
+        countIO.unobserve(en.target);
+      }
+    });
+  }, { threshold: 0.45 });
+  document.querySelectorAll('[data-count-to], [data-count-range]').forEach(function(n){
+    countIO.observe(n);
+  });
+
+  /* ---------- mobile menu ---------- */
+  var list = document.getElementById('navList');
+  document.getElementById('menuBtn').addEventListener('click', function(){
+    list.classList.toggle('open');
+  });
+  list.addEventListener('click', function(e){
+    if (e.target.tagName === 'A') list.classList.remove('open');
+  });
+})();
+</script>
+</body>
+</html>
