@@ -1,9 +1,18 @@
 {
   "name": "designclub",
+  "main": "src/worker.js",
   "compatibility_date": "2026-08-28",
   "assets": {
     "directory": "./",
+    "binding": "ASSETS",
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "designclub-applications",
+      "database_id": "9aad0185-6f13-4c97-a245-25346c9f806c"
+    }
+  ]
 }

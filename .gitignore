@@ -1,1 +1,6 @@
 .wrangler/
+.dev.vars
+
+# Superseded photo originals — the web-sized versions are committed instead
+Gordon.png
+cayden'.jpg

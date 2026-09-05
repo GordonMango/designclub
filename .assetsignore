@@ -1,0 +1,12 @@
+.git/
+.wrangler/
+node_modules/
+src/
+schema.sql
+wrangler.jsonc
+.assetsignore
+.gitignore
+.dev.vars
+*.md
+Gordon.png
+cayden'.jpg
