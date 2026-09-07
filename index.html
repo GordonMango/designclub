@@ -96,6 +96,32 @@ a{color:inherit;text-decoration:none}
 }
 .pi-card p{font-family:var(--term);font-size:13px;letter-spacing:.08em;line-height:1.7;color:var(--grey);text-transform:none}
 
+.teacher-card{
+  display:grid;
+  grid-template-columns:240px 1fr;
+  gap:28px;
+  align-items:start;
+  margin-top:30px;
+  padding:24px;
+  background:rgba(12,16,18,.82);
+  border:1px solid rgba(36,242,156,.22);
+  box-shadow:0 20px 45px rgba(0,0,0,.14);
+}
+.teacher-card .pi-avatar{aspect-ratio:3/4}
+.teacher-card .body{display:flex; flex-direction:column; gap:18px}
+.teacher-card .name{font-size:22px;color:var(--green);line-height:1.3}
+.teacher-card .role-tag{
+  display:inline-block;
+  width:fit-content;
+  padding:7px 11px;
+  border:1px solid rgba(36,242,156,.35);
+  color:var(--green);
+  font-size:9px;
+  letter-spacing:.18em;
+  background:rgba(36,242,156,.06);
+}
+.teacher-card p{font-family:var(--term);font-size:15px;letter-spacing:.08em;line-height:1.7;color:var(--grey);text-transform:none}
+
 /* ---------- shared background furniture ---------- */
 .scanlines{
   position:fixed; inset:0; z-index:900; pointer-events:none; opacity:.35;
@@ -1080,6 +1106,8 @@ footer a:hover{color:var(--green)}
   .menu-btn{display:block}
   .ev{grid-template-columns:1fr; gap:10px}
   .ev .tag{justify-self:start}
+  .teacher-card{grid-template-columns:1fr; gap:22px; padding:18px}
+  .teacher-card .pi-avatar{max-width:260px}
   .defs{grid-template-columns:1fr; gap:24px}
   .comp{grid-template-columns:1fr; gap:12px}
   .comp .tag{justify-self:start}
@@ -1605,6 +1633,16 @@ footer a:hover{color:var(--green)}
       <div class="rule"></div>
     </div>
     <p class="prose rv" style="max-width:78ch; margin-bottom:40px">A student-led engineering collective building projects, mentorship, and competition-ready innovation.</p>
+    <div class="rv">
+      <article class="teacher-card">
+        <div class="pi-avatar"><img src="Halushka.jpg" alt="Mr. Halushka"></div>
+        <div class="body">
+          <div class="name">Mr. Halushka</div>
+          <div class="role-tag">MYP Design Teacher &amp; Technology Coordinator</div>
+          <p>Mr. Halushka is the MYP Design teacher and Technology Coordinator at Southpointe. He is passionate about design and technology, and loves helping students turn their ideas into reality &mdash; whether through problem-solving, creating, or building something new. He believes every student has amazing potential waiting to be discovered, and he is excited to support the Design and Engineering Club and work with members to make something awesome happen.</p>
+        </div>
+      </article>
+    </div>
     <div class="rv">
       <div class="pi-card-grid">
         <article class="pi-card">
