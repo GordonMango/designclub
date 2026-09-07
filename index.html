@@ -96,6 +96,32 @@ a{color:inherit;text-decoration:none}
 }
 .pi-card p{font-family:var(--term);font-size:13px;letter-spacing:.08em;line-height:1.7;color:var(--grey);text-transform:none}
 
+.teacher-card{
+  display:grid;
+  grid-template-columns:240px 1fr;
+  gap:28px;
+  align-items:start;
+  margin-top:30px;
+  padding:24px;
+  background:rgba(12,16,18,.82);
+  border:1px solid rgba(36,242,156,.22);
+  box-shadow:0 20px 45px rgba(0,0,0,.14);
+}
+.teacher-card .pi-avatar{aspect-ratio:3/4}
+.teacher-card .body{display:flex; flex-direction:column; gap:18px}
+.teacher-card .name{font-size:22px;color:var(--green);line-height:1.3}
+.teacher-card .role-tag{
+  display:inline-block;
+  width:fit-content;
+  padding:7px 11px;
+  border:1px solid rgba(36,242,156,.35);
+  color:var(--green);
+  font-size:9px;
+  letter-spacing:.18em;
+  background:rgba(36,242,156,.06);
+}
+.teacher-card p{font-family:var(--term);font-size:15px;letter-spacing:.08em;line-height:1.7;color:var(--grey);text-transform:none}
+
 /* ---------- shared background furniture ---------- */
 .scanlines{
   position:fixed; inset:0; z-index:900; pointer-events:none; opacity:.35;
@@ -454,6 +480,43 @@ section{position:relative; padding:120px 28px; z-index:2}
 .join-box h2{font-size:clamp(16px,3.4vw,26px); letter-spacing:.16em; margin-bottom:18px}
 .join-box p{font-family:var(--term); font-size:20px; color:var(--grey); letter-spacing:.1em;
   max-width:520px; margin:0 auto 34px; text-transform:none; line-height:1.55}
+
+/* application form */
+.apply-form{max-width:640px; margin:34px auto 0; text-align:left}
+.apply-row{margin-bottom:20px}
+.apply-row label{
+  display:block; font-family:var(--px); font-size:9px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--green); margin-bottom:9px; line-height:1.6;
+}
+.apply-row .req{color:var(--magenta)}
+.apply-form input, .apply-form select, .apply-form textarea{
+  width:100%; box-sizing:border-box;
+  font-family:var(--term); font-size:18px; letter-spacing:.06em;
+  color:#e8ecea; background:var(--bg); border:1px solid var(--green-dim);
+  padding:12px 14px; outline:none;
+  transition:border-color .18s ease, box-shadow .18s ease;
+}
+.apply-form textarea{resize:vertical; min-height:118px; line-height:1.5}
+.apply-form input:focus, .apply-form select:focus, .apply-form textarea:focus{
+  border-color:var(--green);
+  box-shadow:0 0 0 1px rgba(36,242,156,.3), inset 0 0 22px rgba(36,242,156,.06);
+}
+.apply-form select{cursor:pointer}
+.apply-form option{background:var(--bg); color:#e8ecea}
+.apply-hp{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden}
+.apply-actions{margin-top:26px}
+.apply-form button[disabled]{opacity:.45; cursor:not-allowed}
+.join-box .apply-note{
+  font-family:var(--term); font-size:15px; color:var(--grey-dim); letter-spacing:.08em;
+  text-transform:none; margin:16px 0 0; line-height:1.55; max-width:none;
+}
+.join-box .apply-msg{
+  font-family:var(--term); font-size:18px; letter-spacing:.08em; text-transform:none;
+  margin:18px 0 0; line-height:1.55; max-width:none; display:none;
+}
+.join-box .apply-msg.show{display:block}
+.apply-msg.ok{color:var(--green)}
+.apply-msg.err{color:var(--magenta)}
 
 /* footer */
 footer{
@@ -1043,6 +1106,8 @@ footer a:hover{color:var(--green)}
   .menu-btn{display:block}
   .ev{grid-template-columns:1fr; gap:10px}
   .ev .tag{justify-self:start}
+  .teacher-card{grid-template-columns:1fr; gap:22px; padding:18px}
+  .teacher-card .pi-avatar{max-width:260px}
   .defs{grid-template-columns:1fr; gap:24px}
   .comp{grid-template-columns:1fr; gap:12px}
   .comp .tag{justify-self:start}
@@ -1412,24 +1477,25 @@ footer a:hover{color:var(--green)}
         </article>
 
         <article class="pi-card">
-          <div class="pi-avatar">G</div>
+          <div class="pi-avatar"><img src="Gordon.jpg" alt="Gordon"></div>
           <div class="name">Gordon</div>
           <div class="role-tag">Founder</div>
           <p>Founded the club and sets the long-term vision, culture, and strategic direction for student innovation and competition work.</p>
         </article>
 
         <article class="pi-card">
-          <div class="pi-avatar">T</div>
-          <div class="name">Terrence</div>
-          <div class="role-tag">IT Guy</div>
-          <p>Maintains the club&rsquo;s technical systems, website infrastructure, and digital support so teams can focus on building and shipping projects.</p>
+          <div class="pi-avatar"><img src="William.png" alt="William"></div>
+          <div class="name">William</div>
+          <div class="role-tag">Vice President</div>
+          <p>Brings a passion for design and every branch of science to the club, supporting leadership operations and helping members turn complex problems into buildable, well-engineered solutions.</p>
+          <p><strong>Achievement Highlights:</strong> Multiple-time Michael Krooks Physics Prize recipient, BC Award winner at science fair.</p>
         </article>
 
         <article class="pi-card">
-          <div class="pi-avatar">J</div>
+          <div class="pi-avatar"><img src="Jason.png" alt="Jason"></div>
           <div class="name">Jason</div>
-          <div class="role-tag">Vice President</div>
-          <p>Supports leadership operations, helps coordinate club initiatives, and strengthens member engagement across projects and events.</p>
+          <div class="role-tag">Director of Social Media</div>
+          <p>Leads the club&rsquo;s social media presence, creating regular posts that highlight projects, competitions, workshops, achievements, recruitment opportunities, and upcoming events.</p>
         </article>
       </div>
       <div class="reason">
@@ -1568,6 +1634,16 @@ footer a:hover{color:var(--green)}
     </div>
     <p class="prose rv" style="max-width:78ch; margin-bottom:40px">A student-led engineering collective building projects, mentorship, and competition-ready innovation.</p>
     <div class="rv">
+      <article class="teacher-card">
+        <div class="pi-avatar"><img src="Halushka.jpg" alt="Mr. Halushka"></div>
+        <div class="body">
+          <div class="name">Mr. Halushka</div>
+          <div class="role-tag">MYP Design Teacher &amp; Technology Coordinator</div>
+          <p>Mr. Halushka is the MYP Design teacher and Technology Coordinator at Southpointe. He is passionate about design and technology, and loves helping students turn their ideas into reality &mdash; whether through problem-solving, creating, or building something new. He believes every student has amazing potential waiting to be discovered, and he is excited to support the Design and Engineering Club and work with members to make something awesome happen.</p>
+        </div>
+      </article>
+    </div>
+    <div class="rv">
       <div class="pi-card-grid">
         <article class="pi-card">
           <div class="pi-avatar"><img src="Ethan.jpg" alt="Ethan Circle"></div>
@@ -1576,22 +1652,34 @@ footer a:hover{color:var(--green)}
           <p>Leads the club&rsquo;s engineering vision, technical direction, and project mentorship across design, robotics, prototyping, and fabrication.</p>
         </article>
         <article class="pi-card">
-          <div class="pi-avatar">G</div>
+          <div class="pi-avatar"><img src="Gordon.jpg" alt="Gordon"></div>
           <div class="name">Gordon</div>
           <div class="role-tag">Founder</div>
           <p>Founded the club and drives the long-term strategy, culture, and student innovation goals.</p>
         </article>
         <article class="pi-card">
-          <div class="pi-avatar">T</div>
-          <div class="name">Terrence</div>
-          <div class="role-tag">IT Guy</div>
-          <p>Maintains the club&rsquo;s technical systems and digital infrastructure so projects and operations run smoothly.</p>
+          <div class="pi-avatar"><img src="Jason.png" alt="Jason"></div>
+          <div class="name">Jason</div>
+          <div class="role-tag">Director of Social Media</div>
+          <p>Runs the club&rsquo;s social channels, posting the projects, competitions, workshops, and achievements that keep members and families up to date.</p>
         </article>
         <article class="pi-card">
-          <div class="pi-avatar">J</div>
-          <div class="name">Jason</div>
+          <div class="pi-avatar"><img src="William.png" alt="William"></div>
+          <div class="name">William</div>
           <div class="role-tag">Vice President</div>
-          <p>Helps direct club operations, member engagement, and leadership support across the organization.</p>
+          <p>Entering Grade 11 at Southpointe Academy, William brings a passion for design and every branch of science to the club. He is a multiple-time recipient of the Michael Krooks Physics Prize and a BC Award winner at science fair, and he is drawn to the challenge of turning complex problems into buildable, well-engineered solutions.</p>
+        </article>
+        <article class="pi-card">
+          <div class="pi-avatar"><img src="Cayden.jpg" alt="Cayden"></div>
+          <div class="name">Cayden</div>
+          <div class="role-tag">Director of Competitions</div>
+          <p>Entering Grade 11 at Southpointe Academy, Cayden pairs a strong interest in the sciences with a commitment to social activism. As Director of Competitions he researches opportunities, organizes teams, and helps members prepare for events such as Skills Canada, science fairs, and engineering challenges &mdash; drawn throughout to work where scientific rigour meets questions of equity, access, and community impact.</p>
+        </article>
+        <article class="pi-card">
+          <div class="pi-avatar"><img src="Evan.png" alt="Evan Chen"></div>
+          <div class="name">Evan Chen</div>
+          <div class="role-tag">Director of Media</div>
+          <p>Evan is deeply dedicated to the arts and consistently innovative in his craft, having taken on leadership roles in media and at numerous Model UN conferences. As Director of Media he looks forward to capturing the best highlights from every event and delivering 4K photography for the club&rsquo;s competitions.</p>
         </article>
       </div>
     </div>
@@ -1627,8 +1715,70 @@ footer a:hover{color:var(--green)}
       <p>Anyone can join. We accept any student in grades 5&ndash;12 as long as you are able to participate in events &mdash; no prior STEM experience required. Talk to Gordon to get your name on the list.</p>
       <div class="hero-actions">
         <a class="btn solid" href="https://join.slack.com/t/spadesignclub/shared_invite/zt-48lqiatur-WnM3Soh~hfaKnw_AOlD8_A" target="_blank" rel="noreferrer">Join our Slack</a>
-        <a class="btn" href="#roles">Apply for a role</a>
+        <a class="btn" href="#roles">See open roles</a>
       </div>
+
+      <form class="apply-form" id="applyForm" novalidate>
+        <div class="apply-row">
+          <label for="ap-name">Full name <span class="req">*</span></label>
+          <input id="ap-name" name="name" type="text" maxlength="100" autocomplete="name" required>
+        </div>
+        <div class="apply-row">
+          <label for="ap-email">Email <span class="req">*</span></label>
+          <input id="ap-email" name="email" type="email" maxlength="200" autocomplete="email" required>
+        </div>
+        <div class="apply-row">
+          <label for="ap-grade">Grade this year <span class="req">*</span></label>
+          <select id="ap-grade" name="grade" required>
+            <option value="">Select&hellip;</option>
+            <option>5</option>
+            <option>6</option>
+            <option>7</option>
+            <option>8</option>
+            <option>9</option>
+            <option>10</option>
+            <option>11</option>
+            <option>12</option>
+          </select>
+        </div>
+        <div class="apply-row">
+          <label for="ap-role">Role you&rsquo;re applying for <span class="req">*</span></label>
+          <select id="ap-role" name="role" required>
+            <option value="">Select&hellip;</option>
+            <option>Vice President / Operations Lead</option>
+            <option>Director of Competitions</option>
+            <option>Secretariat of Outreach</option>
+            <option>Director of Sponsorship &amp; Fundraising</option>
+            <option>Social Media Managers</option>
+            <option>Engineering Mentors</option>
+            <option>CAD &amp; Mechanical Design Mentors</option>
+            <option>Coding &amp; AI Mentors</option>
+            <option>Electronics &amp; Robotics Mentors</option>
+            <option>Research &amp; Pitch Writers</option>
+            <option>Prototype &amp; Fabrication Assistants</option>
+            <option>Event &amp; Workshop Assistants</option>
+            <option>General member</option>
+          </select>
+        </div>
+        <div class="apply-row">
+          <label for="ap-exp">Relevant experience</label>
+          <textarea id="ap-exp" name="experience" maxlength="1000" placeholder="Projects, competitions, software, clubs &mdash; anything relevant. Optional."></textarea>
+        </div>
+        <div class="apply-row">
+          <label for="ap-why">Why do you want this role? <span class="req">*</span></label>
+          <textarea id="ap-why" name="why" maxlength="2000" required placeholder="A few sentences is plenty."></textarea>
+        </div>
+
+        <div class="apply-hp" aria-hidden="true">
+          <label>Leave this empty<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+        </div>
+
+        <div class="apply-actions">
+          <button class="btn solid" type="submit">Submit application</button>
+        </div>
+        <div class="apply-msg" id="applyMsg" role="status" aria-live="polite"></div>
+        <div class="apply-note">Your application goes straight to the club leads &mdash; nobody else can see it.</div>
+      </form>
     </div>
   </div>
 </section>
@@ -1643,6 +1793,55 @@ footer a:hover{color:var(--green)}
 </div><!-- /#site -->
 
 <script src="vendor/scrollcraft/scrollcraft.js"></script>
+<script>
+/* ---------- application form ---------- */
+(function(){
+  'use strict';
+  var form = document.getElementById('applyForm');
+  if(!form) return;
+
+  var msg = document.getElementById('applyMsg');
+  var btn = form.querySelector('button[type=submit]');
+
+  function show(text, kind){
+    msg.textContent = text;
+    msg.className = 'apply-msg show' + (kind ? ' ' + kind : '');
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+
+    var data = {};
+    new FormData(form).forEach(function(v, k){ data[k] = v; });
+
+    btn.disabled = true;
+    show('Sending\u2026', '');
+
+    fetch('/api/apply', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    .then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(body){
+        return { ok: r.ok, body: body };
+      });
+    })
+    .then(function(res){
+      if(res.ok && res.body.ok){
+        form.reset();
+        show('Application received. We\u2019ll be in touch soon.', 'ok');
+      } else {
+        show(res.body.error || 'Something went wrong. Please try again.', 'err');
+      }
+    })
+    .catch(function(){
+      show('Network error. Check your connection and try again.', 'err');
+    })
+    .then(function(){ btn.disabled = false; });
+  });
+})();
+</script>
 <script>
 (function(){
   'use strict';

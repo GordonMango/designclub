@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Applications — SPA Design Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#111111; --bg-2:#0b0b0b; --green:#24f29c; --green-dim:rgba(36,242,156,.45);
+  --grey:#aaadb0; --grey-dim:#5c6265; --magenta:#f2249c;
+  --px:'Press Start 2P','Courier New',monospace; --term:'VT323','Courier New',monospace;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:#e8ecea; font-family:var(--term); font-size:18px;
+  letter-spacing:.05em; -webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px; margin:0 auto; padding:40px 24px 80px}
+h1{font-family:var(--px); font-size:13px; letter-spacing:.18em; color:var(--green);
+  text-transform:uppercase; margin:0}
+.bar{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  border-bottom:1px solid var(--green-dim); padding-bottom:18px; margin-bottom:28px}
+.count{color:var(--grey-dim); font-size:16px}
+button{font-family:var(--px); font-size:9px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--green); background:transparent; border:1px solid var(--green-dim);
+  padding:11px 16px; cursor:pointer; transition:background .18s ease, border-color .18s ease}
+button:hover{background:rgba(36,242,156,.1); border-color:var(--green)}
+button[disabled]{opacity:.45; cursor:not-allowed}
+button.danger{color:var(--magenta); border-color:rgba(242,36,156,.45)}
+button.danger:hover{background:rgba(242,36,156,.1); border-color:var(--magenta)}
+input[type=password],input[type=search]{width:100%; font-family:var(--term); font-size:18px;
+  color:#e8ecea; background:var(--bg-2); border:1px solid var(--green-dim); padding:12px 14px; outline:none}
+input:focus{border-color:var(--green); box-shadow:0 0 0 1px rgba(36,242,156,.3)}
+label{display:block; font-family:var(--px); font-size:9px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--green); margin-bottom:9px}
+
+/* login */
+#login{max-width:380px; margin:14vh auto 0}
+#login h1{margin-bottom:26px; text-align:center}
+#login .row{margin-bottom:18px}
+#login button{width:100%; padding:13px}
+
+/* list */
+.app{border:1px solid var(--green-dim); background:var(--bg-2); padding:22px; margin-bottom:16px}
+.app-top{display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:baseline}
+.app .name{font-family:var(--px); font-size:11px; letter-spacing:.14em; color:var(--green)}
+.app .when{color:var(--grey-dim); font-size:15px}
+.app .meta{color:var(--grey); margin-top:10px; font-size:17px}
+.app .meta a{color:var(--green); text-decoration:none; border-bottom:1px solid var(--green-dim)}
+.app h4{font-family:var(--px); font-size:8px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--grey-dim); margin:18px 0 7px}
+.app p{margin:0; line-height:1.55; white-space:pre-wrap; word-break:break-word}
+.app-actions{margin-top:18px; display:flex; gap:10px; flex-wrap:wrap}
+.ai{border:1px solid rgba(36,242,156,.3); background:rgba(36,242,156,.05); padding:16px; margin-top:16px}
+.ai h4{margin-top:0}
+.ai ol{margin:0; padding-left:20px}
+.ai li{margin-bottom:9px; line-height:1.5}
+.ai .role{color:var(--green)}
+.ai .fit{font-family:var(--px); font-size:7px; letter-spacing:.14em; text-transform:uppercase;
+  border:1px solid var(--green-dim); padding:3px 6px; margin-left:7px; white-space:nowrap}
+.ai .sum{margin-top:12px; color:var(--grey); line-height:1.55}
+.ai .disclaimer{margin-top:12px; color:var(--grey-dim); font-size:14px; line-height:1.5}
+.msg{margin-top:16px; line-height:1.5}
+.msg.err{color:var(--magenta)}
+.msg.ok{color:var(--green)}
+.empty{color:var(--grey-dim); text-align:center; padding:60px 0}
+.hidden{display:none}
+@media (max-width:560px){ .wrap{padding:24px 16px 60px} }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <section id="login">
+    <h1>Applications</h1>
+    <div class="row">
+      <label for="pw">Password</label>
+      <input id="pw" type="password" autocomplete="current-password" autofocus>
+    </div>
+    <button id="loginBtn" type="button">Sign in</button>
+    <div class="msg err" id="loginMsg"></div>
+  </section>
+
+  <section id="panel" class="hidden">
+    <div class="bar">
+      <h1>Applications <span class="count" id="count"></span></h1>
+      <div>
+        <button id="refreshBtn" type="button">Refresh</button>
+        <button id="csvBtn" type="button">Copy as CSV</button>
+        <button id="logoutBtn" type="button">Sign out</button>
+      </div>
+    </div>
+    <div class="row" style="margin-bottom:22px">
+      <input id="filter" type="search" placeholder="Filter by name, email, role or grade…">
+    </div>
+    <div id="list"></div>
+    <div class="msg" id="panelMsg"></div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var loginEl = document.getElementById('login');
+  var panelEl = document.getElementById('panel');
+  var pw = document.getElementById('pw');
+  var loginBtn = document.getElementById('loginBtn');
+  var loginMsg = document.getElementById('loginMsg');
+  var listEl = document.getElementById('list');
+  var countEl = document.getElementById('count');
+  var panelMsg = document.getElementById('panelMsg');
+  var filterEl = document.getElementById('filter');
+
+  var apps = [];
+
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function say(el, text, kind){
+    el.textContent = text || '';
+    el.className = 'msg' + (kind ? ' ' + kind : '');
+  }
+
+  function fmt(ts){
+    if(!ts) return '';
+    var d = new Date(ts.replace(' ', 'T') + 'Z');
+    return isNaN(d) ? ts : d.toLocaleString();
+  }
+
+  function aiBlock(a){
+    if(!a.ai_review) return '';
+    var r;
+    try { r = typeof a.ai_review === 'string' ? JSON.parse(a.ai_review) : a.ai_review; }
+    catch(e){ return ''; }
+    if(!r || !r.recommendations || !r.recommendations.length) return '';
+
+    return '<div class="ai"><h4>AI role suggestions</h4><ol>' +
+      r.recommendations.map(function(x){
+        return '<li><span class="role">' + esc(x.role) + '</span>' +
+          '<span class="fit">' + esc(x.fit || '') + '</span><br>' + esc(x.reason || '') + '</li>';
+      }).join('') +
+      '</ol>' +
+      (r.summary ? '<div class="sum">' + esc(r.summary) + '</div>' : '') +
+      '<div class="disclaimer">A suggestion from a language model, not a decision. Read the application yourself.</div>' +
+      '</div>';
+  }
+
+  function render(){
+    var q = filterEl.value.trim().toLowerCase();
+    var rows = !q ? apps : apps.filter(function(a){
+      return [a.name, a.email, a.role, a.grade].join(' ').toLowerCase().indexOf(q) !== -1;
+    });
+
+    countEl.textContent = rows.length === apps.length
+      ? '(' + apps.length + ')'
+      : '(' + rows.length + ' of ' + apps.length + ')';
+
+    if(!rows.length){
+      listEl.innerHTML = '<div class="empty">' +
+        (apps.length ? 'Nothing matches that filter.' : 'No applications yet.') + '</div>';
+      return;
+    }
+
+    listEl.innerHTML = rows.map(function(a){
+      return '<article class="app">' +
+        '<div class="app-top">' +
+          '<div class="name">' + esc(a.name) + '</div>' +
+          '<div class="when">' + esc(fmt(a.created_at)) + '</div>' +
+        '</div>' +
+        '<div class="meta">Grade ' + esc(a.grade) + ' &middot; ' + esc(a.role) +
+          ' &middot; <a href="mailto:' + esc(a.email) + '">' + esc(a.email) + '</a></div>' +
+        (a.experience ? '<h4>Experience</h4><p>' + esc(a.experience) + '</p>' : '') +
+        '<h4>Why this role</h4><p>' + esc(a.why) + '</p>' +
+        aiBlock(a) +
+        '<div class="app-actions">' +
+          '<button data-ai="' + a.id + '" type="button">' +
+            (a.ai_review ? 'Re-run AI suggestion' : 'Suggest roles with AI') + '</button>' +
+          '<button class="danger" data-del="' + a.id + '" type="button">Delete</button>' +
+        '</div>' +
+      '</article>';
+    }).join('');
+  }
+
+  function load(){
+    say(panelMsg, 'Loading…');
+    return fetch('/api/admin/applications', { credentials: 'same-origin' })
+      .then(function(r){
+        if(r.status === 401){ show(false); say(loginMsg, 'Session expired. Sign in again.', 'err'); return null; }
+        return r.json();
+      })
+      .then(function(body){
+        if(!body) return;
+        if(!body.ok){ say(panelMsg, body.error || 'Could not load applications.', 'err'); return; }
+        apps = body.applications || [];
+        say(panelMsg, '');
+        render();
+      })
+      .catch(function(){ say(panelMsg, 'Network error.', 'err'); });
+  }
+
+  function show(authed){
+    loginEl.className = authed ? 'hidden' : '';
+    panelEl.className = authed ? '' : 'hidden';
+  }
+
+  function login(){
+    var value = pw.value;
+    if(!value){ say(loginMsg, 'Enter the password.', 'err'); return; }
+    loginBtn.disabled = true;
+    say(loginMsg, 'Checking…');
+
+    fetch('/api/admin/login', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ password: value })
+    })
+    .then(function(r){ return r.json().catch(function(){ return {}; }); })
+    .then(function(body){
+      if(body.ok){
+        pw.value = '';
+        say(loginMsg, '');
+        show(true);
+        load();
+      } else {
+        say(loginMsg, body.error || 'Incorrect password.', 'err');
+      }
+    })
+    .catch(function(){ say(loginMsg, 'Network error.', 'err'); })
+    .then(function(){ loginBtn.disabled = false; });
+  }
+
+  function toCsv(){
+    var head = ['id','created_at','name','email','grade','role','experience','why'];
+    var q = function(v){ return '"' + String(v == null ? '' : v).replace(/"/g,'""') + '"'; };
+    return [head.join(',')].concat(apps.map(function(a){
+      return head.map(function(k){ return q(a[k]); }).join(',');
+    })).join('\n');
+  }
+
+  loginBtn.addEventListener('click', login);
+  pw.addEventListener('keydown', function(e){ if(e.key === 'Enter') login(); });
+  filterEl.addEventListener('input', render);
+  document.getElementById('refreshBtn').addEventListener('click', load);
+
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    fetch('/api/admin/logout', { method:'POST', credentials:'same-origin' })
+      .then(function(){ apps = []; show(false); pw.focus(); });
+  });
+
+  document.getElementById('csvBtn').addEventListener('click', function(){
+    if(!apps.length){ say(panelMsg, 'Nothing to copy yet.', 'err'); return; }
+    navigator.clipboard.writeText(toCsv())
+      .then(function(){ say(panelMsg, 'Copied ' + apps.length + ' rows. Paste into a spreadsheet.', 'ok'); })
+      .catch(function(){ say(panelMsg, 'Could not copy — your browser blocked clipboard access.', 'err'); });
+  });
+
+  listEl.addEventListener('click', function(e){
+    var aiBtn = e.target.closest('button[data-ai]');
+    if(aiBtn){
+      var aid = aiBtn.getAttribute('data-ai');
+      var app = apps.filter(function(a){ return String(a.id) === String(aid); })[0];
+      var again = app && app.ai_review ? '?force=1' : '';
+      aiBtn.disabled = true;
+      aiBtn.textContent = 'Thinking…';
+      fetch('/api/admin/applications/' + aid + '/review' + again, {
+        method: 'POST', credentials: 'same-origin'
+      })
+      .then(function(r){ return r.json().catch(function(){ return {}; }); })
+      .then(function(body){
+        if(body.ok && app){ app.ai_review = body.review; render(); }
+        else { say(panelMsg, body.error || 'The AI review failed.', 'err');
+               aiBtn.disabled = false; aiBtn.textContent = 'Suggest roles with AI'; }
+      })
+      .catch(function(){
+        say(panelMsg, 'Network error.', 'err');
+        aiBtn.disabled = false; aiBtn.textContent = 'Suggest roles with AI';
+      });
+      return;
+    }
+
+    var btn = e.target.closest('button[data-del]');
+    if(!btn) return;
+    var id = btn.getAttribute('data-del');
+    if(!confirm('Delete this application permanently?')) return;
+    btn.disabled = true;
+    fetch('/api/admin/applications/' + id, { method:'DELETE', credentials:'same-origin' })
+      .then(function(r){ return r.json().catch(function(){ return {}; }); })
+      .then(function(body){
+        if(body.ok){ apps = apps.filter(function(a){ return String(a.id) !== String(id); }); render(); }
+        else { say(panelMsg, body.error || 'Could not delete.', 'err'); btn.disabled = false; }
+      })
+      .catch(function(){ say(panelMsg, 'Network error.', 'err'); btn.disabled = false; });
+  });
+
+  // A stale cookie means we can skip the password prompt.
+  fetch('/api/admin/applications', { credentials: 'same-origin' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(body){
+      if(body && body.ok){ apps = body.applications || []; show(true); render(); }
+    })
+    .catch(function(){});
+})();
+</script>
+</body>
+</html>
