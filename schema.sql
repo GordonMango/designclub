@@ -12,7 +12,10 @@ CREATE TABLE IF NOT EXISTS applications (
   why         TEXT NOT NULL,
   ip          TEXT,
   user_agent  TEXT,
-  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  -- Cached AI role suggestions (JSON), filled in on demand from the admin page.
+  ai_review      TEXT,
+  ai_reviewed_at TEXT
 );
 
 -- Supports the newest-first review query and the per-IP rate limit check.
